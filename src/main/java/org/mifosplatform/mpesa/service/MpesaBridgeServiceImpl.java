@@ -44,6 +44,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService{
 			final BigDecimal mpesaAmount, final String sender) {
 		Mpesa mpesa = null;
 		Mpesa response = null;
+		String responseData = "";
 		try{
 			if(id != null && mpesaCode != null && !mpesaCode.equalsIgnoreCase("")){
 				mpesa = new Mpesa();
@@ -63,14 +64,19 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService{
 				mpesa.setSender(sender);
 				mpesa.setStatus("R");
 				response = this.mpesaBridgeRepository.save(mpesa);
+				if(response != null){
+					responseData = "Thank you for your payment";
+				}
 				System.out.println("response " + response);
 			}else{
 				logger.info("Empty Parameter passed");
+				responseData = "Empty Parameter passed";
 			}
 		}catch(Exception e){
 			logger.error("Exception while storeTransactionDetails " + e);
+			return responseData = e.getMessage();
 		}
-		return response.getIpnId().toString();
+		return responseData;
 	}
 
 
@@ -97,7 +103,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService{
 				   throw new RuntimeException("Failed : HTTP error code : "
 					+ response.getStatus());
 				}
-		 
+		  
 				String output = response.getEntity(String.class);
 				JSONArray root = (JSONArray) JSONValue.parseWithException(output);
 				JSONObject rootObj = (JSONObject) root.get(0);
