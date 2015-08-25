@@ -36,10 +36,10 @@ public class Mpesa {
 	@Column(name="text")
 	private String testMessage;
 	
-	@Column(name="user")
+	@Column(name="mpesauser")
 	private String user;
 	
-	@Column(name="password")
+	@Column(name="mpesapassword")
 	private String password;
 
 	@Column(name="mpesa_transaction_code")
