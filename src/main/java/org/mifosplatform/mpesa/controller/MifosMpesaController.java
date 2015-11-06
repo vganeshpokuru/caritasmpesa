@@ -16,8 +16,11 @@
 package org.mifosplatform.mpesa.controller;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import javax.ws.rs.QueryParam;
 
@@ -89,32 +92,74 @@ public class MifosMpesaController {
 	}
 	
 	@RequestMapping(value = "/mpesatransactions", method = RequestMethod.GET)
-	public @ResponseBody ResponseEntity<Collection<String>> retriveAllTransactions(){
-		Collection<String> transactionDetails = null;
+	public @ResponseBody ResponseEntity<ArrayList<Mpesa>> retriveAllTransactions(Long  officeId){
+		ArrayList<Mpesa> transactionDetails = null;
 		try{
-			transactionDetails = this.mpesaBridgeService.retriveAllTransactions();
+			transactionDetails = this.mpesaBridgeService.retriveAllTransactions(officeId);
 		}catch(Exception e){
 			logger.error("Exception " + e);
 		}
-		return new ResponseEntity<>(transactionDetails,HttpStatus.OK);
+		return new ResponseEntity<ArrayList<Mpesa>>(transactionDetails,HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/getunmappedtransactions", method = RequestMethod.GET)
-	public @ResponseBody ResponseEntity<Collection<Mpesa>> retriveUnmappedTransactions(){
+	public @ResponseBody ResponseEntity<Collection<Mpesa>> retriveUnmappedTransactions(@QueryParam("officeId")final Long officeId){
 		Collection<Mpesa> transactionDetails = null;
 		 HttpHeaders responseHeaders = new HttpHeaders();
 		 responseHeaders.set("Access-Control-Allow-Origin","*");
 		 responseHeaders.set("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS");
 		 //responseHeaders.setOrigin("*");
 		try{
-			this.mpesaBridgeService.retriveAllTransactions();
-			transactionDetails = this.mpesaBridgeService.retriveUnmappedTransactions();
+			this.mpesaBridgeService.retriveAllTransactions(officeId);
+			transactionDetails = this.mpesaBridgeService.retriveUnmappedTransactions(officeId);
 		}catch(Exception e){
 			logger.error("Exception " + e);
 		}
 		
-		return new ResponseEntity<>(transactionDetails,HttpStatus.OK);
+		return new ResponseEntity<Collection<Mpesa>>(transactionDetails,HttpStatus.OK);
 	}
+	
+	@RequestMapping(value = "/postpayment", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<Collection<Mpesa>> completePayment ( @QueryParam("id") final Long id){
+		 HttpHeaders responseHeaders = new HttpHeaders();
+		List<Mpesa>transactionDetails=null;
+		 responseHeaders.set("Access-Control-Allow-Origin","*");
+		 responseHeaders.set("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS");
+		 //responseHeaders.setOrigin("*");
+		try{
+			transactionDetails = this.mpesaBridgeService.Payment(id);
+					}catch(Exception e){
+			logger.error("Exception " + e);
+		}
+		
+		return new ResponseEntity<Collection<Mpesa>>(transactionDetails,HttpStatus.OK);
+	}
+		
+	@RequestMapping(value = "/Search", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<Collection<Mpesa>> Search( @QueryParam("status") final String status,
+			@QueryParam("transactionDate") final String FromDate,@QueryParam("transactionDate") final String ToDate,
+			@QueryParam("mobileNo") final String mobileNo,
+			@QueryParam("officeId")final  Long officeId){
+		 HttpHeaders responseHeaders = new HttpHeaders();
+		Collection<Mpesa>transactionDetails=null;
+		 responseHeaders.set("Access-Control-Allow-Origin","*");
+		 responseHeaders.set("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS");
+		 //responseHeaders.setOrigin("*");
+		 try{   
+			    Date FromDate1=null;			    
+				SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			    if(FromDate!=null&&FromDate!=""){
+			    FromDate1 = formatter.parse(FromDate);			    
+			    }
+			    Date ToDate1    = formatter.parse(ToDate);
+				transactionDetails = this.mpesaBridgeService.searchMpesaDetail(status,mobileNo,FromDate1,ToDate1,officeId);
+						}catch(Exception e){
+				logger.error("Exception " + e);
+			}
+		
+		return new ResponseEntity<Collection<Mpesa>>(transactionDetails,HttpStatus.OK);
+	}		
+
 	
 	
 }

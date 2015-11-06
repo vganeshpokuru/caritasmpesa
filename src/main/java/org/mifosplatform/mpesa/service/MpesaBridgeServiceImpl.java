@@ -1,6 +1,7 @@
 package org.mifosplatform.mpesa.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.mifosplatform.mpesa.repository.MpesaBridgeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.sun.jersey.api.client.Client;
@@ -25,11 +27,22 @@ import com.sun.jersey.api.client.WebResource;
 @Service
 public class MpesaBridgeServiceImpl implements MpesaBridgeService{
 	
-	 private final Logger logger = LoggerFactory.getLogger(MpesaBridgeServiceImpl.class);
+	@Value("${mifosurl}")
+	private String mifosurl;
+	
+	@Value("${mifosusername}")
+	private String mifosusername;
+	
+	@Value("${mifospassword}")
+	private String mifospassword;
+	
+	@Value("${tenantIdentifier}")
+	private String tenantIdentifier;
+	
+	private final Logger logger = LoggerFactory.getLogger(MpesaBridgeServiceImpl.class);
 	
 	private final MpesaBridgeRepository mpesaBridgeRepository;
-	private final String loginURL = "https://localhost:8443/mifosng-provider/api/v1/authentication?username=data&password=yutuchina";
-
+	
 	@Autowired
 	public MpesaBridgeServiceImpl(final MpesaBridgeRepository mpesaBridgeRepository) {
 		super();
@@ -82,45 +95,151 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService{
 
 	@Override
 	@Transactional
-	public Collection<String> retriveAllTransactions() {
-		Collection<String> transactionList = null;
+	public ArrayList<Mpesa> retriveAllTransactions(Long officeId) {
+		ArrayList<Mpesa> transactionList = null;
 		Client client = null;
 		WebResource webResource = null;
+		Boolean nationalIdSearch=false;
+		Long officeid=officeId;		
+		
 		try{
 			final String authenticationKey = loginIntoServerAndGetBase64EncodedAuthenticationKey();
-			transactionList = this.mpesaBridgeRepository.retriveAllTransaction();
-			for(String nationalId : transactionList){
+			transactionList = (ArrayList<Mpesa>) this.mpesaBridgeRepository.fetchTransactionforMapping(officeid);
+			for(int i=0;i<transactionList.size();i++)
+			  {  nationalIdSearch=false;
+				 Mpesa mpesaforsearch=transactionList.get(i);
+				 String [] nationalIdDetails=mpesaforsearch.getTestMessage().split("Acc. ");
+				 String mobileNo=mpesaforsearch.getMobileNo();
+				 String nationalId=nationalIdDetails[1];
+				 if(nationalId!=null && nationalId!="" ){
+				 				 
+				 client = ClientHelper.createClient();
+					webResource = client
+					   .resource(mifosurl+"/mifosng-provider/api/v1/search?query="+nationalId+"&resource=clients");
+			 
+					ClientResponse response = webResource.header("X-mifos-Platform-TenantId", tenantIdentifier)
+								.header("Content-Type", "application/json")
+								.header("Authorization","Basic "+authenticationKey)
+						        .get(ClientResponse.class);
+			 
+					if (response.getStatus() != 200) 
+					{
+					   throw new RuntimeException("Failed : HTTP error code : "
+						+ response.getStatus());
+					}
+			   
+					String clientDetailsByNationalId = response.getEntity(String.class);
+					JSONArray clientsData = (JSONArray) JSONValue.parseWithException(clientDetailsByNationalId);
+					if(clientsData!=null)
+					{
+					  if(clientsData.size()>0)
+					    {	
+					       for(int j=0;j<clientsData.size();j++)
+					         {
+					           JSONObject clientData = (JSONObject) clientsData.get(i);
+					            if(clientData != null && clientData.get("entityType").equals("CLIENT")&&clientData.get("entityNationalId")!=null)
+					             {
+						          if(clientData.get("entityNationalId").equals(nationalId)||clientData.get("entityNationalId")==nationalId)
+						           {
+							         String ClientName=(String) clientData.get("entityName");
+							         nationalIdSearch=true;
+							         callClientMifosApi(clientData.get("entityId").toString(),authenticationKey,mobileNo,ClientName,officeid);
+							         
+						           }
+					             }
+					         }
+					    }
+					}
+				}
+				 	
+			  
+			if(!nationalIdSearch)		
+			  {
+				String mobileNoforSearch=mobileNo.substring(3,mobileNo.length());
+			    String mobileNowithZero=0+mobileNoforSearch;			
 				client = ClientHelper.createClient();
 				webResource = client
-				   .resource("https://localhost:8443/mifosng-provider/api/v1/search?query="+nationalId+"&resource=clientIdentifiers");
+				   .resource(mifosurl+"/mifosng-provider/api/v1/search?query="+mobileNoforSearch+"&resource=clients");
 		 
-				ClientResponse response = webResource.header("X-mifos-Platform-TenantId", "default")
+				ClientResponse clientsDatasearchByMobileNo = webResource.header("X-mifos-Platform-TenantId", tenantIdentifier)
 							.header("Content-Type", "application/json")
 							.header("Authorization","Basic "+authenticationKey)
 					        .get(ClientResponse.class);
 		 
-				if (response.getStatus() != 200) {
+				if (clientsDatasearchByMobileNo.getStatus() != 200) {
 				   throw new RuntimeException("Failed : HTTP error code : "
-					+ response.getStatus());
+					+ clientsDatasearchByMobileNo.getStatus());
 				}
 		  
-				String output = response.getEntity(String.class);
-				JSONArray root = (JSONArray) JSONValue.parseWithException(output);
-				JSONObject rootObj = (JSONObject) root.get(0);
-				if(rootObj != null && rootObj.get("entityType").equals("CLIENTIDENTIFIER")){
-					callClientMifosApi(rootObj.get("parentId").toString(),authenticationKey,nationalId);
-				}else if(rootObj != null && rootObj.get("entityType").equals("SAVINGS")){
-					
+				String cilentsDataByMobileNo = clientsDatasearchByMobileNo.getEntity(String.class);
+				JSONArray cilentsData = (JSONArray) JSONValue.parseWithException(cilentsDataByMobileNo);
+				if(cilentsData!=null)
+				{
+				  if(cilentsData.size()>0)
+				    {	
+				     for(int k=0;k<cilentsData.size();k++)
+				      {
+				         JSONObject clientData = (JSONObject) cilentsData.get(k);
+				         if(clientData != null && clientData.get("entityType").equals("CLIENT")&&clientData.get("entityMobileNo")!=null)
+				           {
+					         if(clientData.get("entityMobileNo").equals(mobileNoforSearch)||clientData.get("entityMobileNo").equals(mobileNowithZero))
+					           {
+						         String ClientName=(String) clientData.get("entityName");
+						          callClientMifosApi(clientData.get("entityId").toString(),authenticationKey,mobileNo,ClientName,officeid);
+						          System.out.println("mobile no");
+					           }
+					        else
+					          {
+						        final List<Mpesa> mpesaList = this.mpesaBridgeRepository.fetchTransactionInfoById(mobileNo,officeid);
+						        for(Mpesa mpesa : mpesaList)
+						         {
+							       if(mpesa.getStatus()!="CMP" && mpesa.getStatus()!="PAID"&& mpesa.getStatus()!="BM")
+							         {
+								       mpesa.setStatus("UNMP");
+							         }
+							           this.mpesaBridgeRepository.save(mpesa);
+						          }
+					           }
+			        	}
+				     else if(clientData != null)
+			       	     {
+					          final List<Mpesa> mpesaList = this.mpesaBridgeRepository.fetchTransactionInfoById(mobileNo,officeid);
+					          for(Mpesa mpesa : mpesaList)
+					          {
+						        if(mpesa.getStatus()!="CMP" && mpesa.getStatus()!="PAID"&& mpesa.getStatus()!="BM")
+						        {
+							      mpesa.setStatus("UNMP");
+						        }
+						        this.mpesaBridgeRepository.save(mpesa);
+					         }					
+				         }
+				      }
+				   }
+				
+				else
+				    {
+					   final List<Mpesa> mpesaList = this.mpesaBridgeRepository.fetchTransactionInfoById(mobileNo,officeid);
+					   for(Mpesa mpesa : mpesaList)
+					    {
+						   if(mpesa.getStatus()!="CMP" && mpesa.getStatus()!="PAID"&& mpesa.getStatus()!="BM")
+						    {
+							 mpesa.setStatus("UNMP");
+							 }
+						    this.mpesaBridgeRepository.save(mpesa);
+					     }
+				     }
 				}
 			}
+		 }	
 		}catch(Exception e){
 			logger.error("Exception " + e);
 		}
 		return transactionList;
 	}
 
-
 	private String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
+		 final String loginURL =mifosurl+"/mifosng-provider/api/v1/authentication?username="+mifosusername+"&password="+mifospassword;
+         System.out.println(loginURL);
 		Client client = null;
 		WebResource webResource = null;
 		String authenticationKey = null;
@@ -128,7 +247,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService{
 			client = ClientHelper.createClient();
 			webResource = client.resource(loginURL);
 			 
-					ClientResponse response = webResource.header("X-mifos-Platform-TenantId", "default")
+					ClientResponse response = webResource.header("X-mifos-Platform-TenantId", tenantIdentifier)
 								.header("Content-Type", "application/json")
 						        .post(ClientResponse.class);
 					String responseData = response.getEntity(String.class);
@@ -143,12 +262,12 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService{
 	}
 
 
-	private void callClientMifosApi(String clientId,String authenticationKey,String nationalId) {
+	private void callClientMifosApi(String clientId,String authenticationKey,String mobileNo,String ClientName,Long officeid) {
 		Client client = null;
 		WebResource webResource = null;
 		try{
 			client = ClientHelper.createClient();
-			webResource = client.resource("https://localhost:8443/mifosng-provider/api/v1/clients/"+clientId+"/accounts");
+			webResource = client.resource(mifosurl+"/mifosng-provider/api/v1/clients/"+clientId+"/accounts");
 			 
 					ClientResponse response = webResource.header("X-mifos-Platform-TenantId", "default")
 								.header("Content-Type", "application/json")
@@ -158,10 +277,11 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService{
 					/*JSONObject rootObj = (JSONObject) JSONValue.parseWithException(responseData);
 					JSONArray loanAccountArray = (JSONArray) rootObj.get("loanAccounts");
 					JSONArray savingAccountArray = (JSONArray) rootObj.get("savingsAccounts");*/
-					final List<Mpesa> mpesaList = this.mpesaBridgeRepository.fetchTransactionInfoByNationalId(nationalId);
+					final List<Mpesa> mpesaList = this.mpesaBridgeRepository.fetchTransactionInfoById(mobileNo,officeid);
 					for(Mpesa mpesa : mpesaList){
-						mpesa.setStatus("R");
+						mpesa.setStatus("CMP");
 						mpesa.setClientId(Long.parseLong(clientId));
+						mpesa.setClientName(ClientName);
 						this.mpesaBridgeRepository.save(mpesa);
 					}
 					/*if(loanAccountArray != null){
@@ -218,9 +338,9 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService{
 			String date = transactionDate.toString(fmt);
 			String json = "{\"transactionAmount\": "+mpesa.getTransactionAmount()+",\"transactionDate\": \""+date+"\",\"locale\": \"en\",\"dateFormat\": \"dd MMMM yyyy\"}";
 			client = ClientHelper.createClient();
-			webResource = client.resource("https://localhost:8443/mifosng-provider/api/v1/loans/"+mpesaId+"/transactions?command=repayment");
+			webResource = client.resource(mifosurl+"/mifosng-provider/api/v1/loans/"+mpesaId+"/transactions?command=repayment");
 			 
-					ClientResponse response = webResource.header("X-mifos-Platform-TenantId", "default")
+					ClientResponse response = webResource.header("X-mifos-Platform-TenantId", tenantIdentifier)
 								.header("Content-Type", "application/json")
 								.header("Authorization","Basic "+authenticationKey)
 						        .post(ClientResponse.class,json);
@@ -237,15 +357,78 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService{
 
 
 	@Override
-	public Collection<Mpesa> retriveUnmappedTransactions() {
+	public Collection<Mpesa> retriveUnmappedTransactions(Long officeId) {
 		Collection<Mpesa> unmappedTransactionList = null;
 		try{
-			unmappedTransactionList = this.mpesaBridgeRepository.retriveUnmappedTransactions();
+			unmappedTransactionList = this.mpesaBridgeRepository.retriveUnmappedTransactions(officeId);
 		}catch(Exception e){
 			logger.error("Exception while retriveUnmappedTransactions " + e);
 		}
 		return unmappedTransactionList;
 	}
- 
+	
+	@Override
+     public List<Mpesa>Payment(Long Id){
+		final List<Mpesa> mpesaList = this.mpesaBridgeRepository.retriveTransactionsforPayment(Id);
+		for(Mpesa mpesa : mpesaList){
+			mpesa.setStatus("PAID");			
+			this.mpesaBridgeRepository.save(mpesa);
+		}
+       return mpesaList;
+     }
+	
+	 @Override
+	public Collection<Mpesa> searchMpesaDetail(String status, String mobileNo,
+			Date fromDate, Date toDate,Long officeId) {
+		Collection<Mpesa> TransactionList = null;
+		try{
+			if(mobileNo!=null&& mobileNo!=""&& status.equals("")&& fromDate==null&&toDate!=null){
+			
+			TransactionList = this.mpesaBridgeRepository.searchByMobileNoTxnDate(mobileNo,toDate,officeId);
+			}
+			if(toDate!=null&&mobileNo.equals("")&& fromDate==null&& status==""){
+				TransactionList = this.mpesaBridgeRepository.toDateSearch(toDate,officeId);
+			}
+			if(status!=null&&status!=""&& mobileNo.equals("")&& fromDate==null&&toDate!=null){
+				if(fromDate==null){
+        	    	Date dt =new Date(0);
+        	    	fromDate=dt;
+        	    }				 				
+				TransactionList = this.mpesaBridgeRepository.search(status,fromDate,toDate,officeId);
+				fromDate=null;				
+			}
+			if(fromDate!=null&&toDate!=null&& mobileNo.equals("") && status.equals("")){
+				
+				TransactionList = this.mpesaBridgeRepository.LikeSearch(fromDate,toDate,officeId);
+			}
+           if(fromDate!=null&&toDate!=null&& mobileNo.equals("") && status!=null&&status!=""){
+				
+				TransactionList = this.mpesaBridgeRepository.search(status,fromDate,toDate,officeId);
+			}
+           if(fromDate!=null&&toDate!=null&& mobileNo!=null&& mobileNo!="" &&status.equals("")&& status==""){
+				
+				TransactionList = this.mpesaBridgeRepository.likesearch(mobileNo,fromDate,toDate,officeId);
+			}
+           if(status!=null&&status!=""&& mobileNo!=null&& mobileNo!=""&& toDate!=null){
+        	    if(fromDate==null){
+        	    	Date dt =new Date(0);
+        	    	fromDate=dt;
+        	    }				
+				TransactionList = this.mpesaBridgeRepository.Exactsearch(status,mobileNo,fromDate,toDate,officeId);
+				fromDate=null;
+			}
+           if(status!=null&&status!=""&& mobileNo!=null&& mobileNo!=""&&fromDate!=null&&toDate!=null){
+				
+				TransactionList = this.mpesaBridgeRepository.Exactsearch(status,mobileNo,fromDate,toDate,officeId);
+			}
+			
+		}catch(Exception e){
+			logger.error("Exception while fetchTransactionByStatus " + e);
+		}
+		return TransactionList;
+	}	
+	
+	}
+	
 
-}
+

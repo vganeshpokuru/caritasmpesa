@@ -9,6 +9,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
 @Table(name="m_ext_txn")
@@ -29,6 +31,9 @@ public class Mpesa {
 	
 	@Column(name="client_id")
 	private Long clientId;
+	
+	@Column(name="client_name")
+	private String clientName;
 
 	@Column(name="time_stamp")
 	private String timeStamp;
@@ -52,6 +57,7 @@ public class Mpesa {
 	private String accountName;
 	
 	@Column(name="mpesa_trx_date")
+	@Temporal(TemporalType.DATE)
 	private Date transactionDate;
 	
 	@Column(name="mpesa_trx_time")
@@ -62,6 +68,12 @@ public class Mpesa {
 	
 	@Column(name="mpesa_sender")
 	private String sender;
+	
+	@Column(name="mpesa_trx_type")
+	 private String type;
+	 
+	 @Column(name="office_Id")
+	 private Long officeId;
 	
 	@Column(name="status")
 	private String status;
@@ -158,8 +170,8 @@ public class Mpesa {
 		return this.transactionDate;
 	}
 
-	public void setTransactionDate(Date transactionDate) {
-		this.transactionDate = transactionDate;
+	public void setTransactionDate(Date txnDate) {
+		this.transactionDate = txnDate;
 	}
 
 	public String getTransactionTime() {
@@ -201,6 +213,31 @@ public class Mpesa {
 	public void setClientId(Long clientId) {
 		this.clientId = clientId;
 	}
+
+	public String getClientName() {
+		return clientName;
+	}
+
+	public void setClientName(String clientName) {
+		this.clientName = clientName;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public Long getOfficeId() {
+		return officeId;
+	}
+
+	public void setOfficeId(Long officeId) {
+		this.officeId = officeId;
+	}
+	
 
 	
 }
