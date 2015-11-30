@@ -51,7 +51,8 @@ public class MifosMpesaController {
 		this.mpesaBridgeService = mpesaBridgeService;
 		
 	}
-
+   
+	
 
 	@RequestMapping(value = "/transactiondetails", method = RequestMethod.POST)
 	public @ResponseBody ResponseEntity<String> storeTransactionDetails(@QueryParam("id") final Long id,@QueryParam("orig") final String orig,
@@ -63,7 +64,7 @@ public class MifosMpesaController {
 		try{
 			if(user.equalsIgnoreCase("caritas") && pass.equalsIgnoreCase("nairobi")){
 				responseMessage = this.mpesaBridgeService.storeTransactionDetails(id,orig,dest,tstamp,text,user,pass,mpesa_code,mpesa_acc,
-					mpesa_msisdn,mpesa_trx_date,mpesa_trx_time,mpesa_amt,mpesa_sender);
+					mpesa_msisdn,mpesa_trx_date,mpesa_trx_time,mpesa_amt,mpesa_sender,null,null);
 			}
 		}catch(Exception e){
 			logger.error("Exception " + e);
@@ -72,17 +73,17 @@ public class MifosMpesaController {
 		return new ResponseEntity<String>(responseMessage,HttpStatus.OK);
 		
 	}
-	
 	@RequestMapping(value = "/transactiondetails", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<String> storeTransactionDetail(@QueryParam("id") final Long id,@QueryParam("orig") final String orig,
 			@QueryParam("dest") final String dest,@QueryParam("tstamp") final String tstamp,@QueryParam("text") final String text,@QueryParam("user")
 			final String user,@QueryParam("pass") final String pass,@QueryParam("mpesa_code") final String mpesa_code, @QueryParam("mpesa_acc")
 			final String mpesa_acc,@QueryParam("mpesa_msisdn") final String mpesa_msisdn,@QueryParam("mpesa_trx_date") final Date mpesa_trx_date,@QueryParam("mpesa_trx_time")
-			final String mpesa_trx_time,@QueryParam("mpesa_amt") final BigDecimal mpesa_amt,@QueryParam("mpesa_sender") final String mpesa_sender){
+			final String mpesa_trx_time,@QueryParam("mpesa_amt") final BigDecimal mpesa_amt,@QueryParam("mpesa_sender") final String mpesa_sender
+			){
 		String responseMessage = "";
 		try{
 			responseMessage = this.mpesaBridgeService.storeTransactionDetails(id,orig,dest,tstamp,text,user,pass,mpesa_code,mpesa_acc,
-					mpesa_msisdn,mpesa_trx_date,mpesa_trx_time,mpesa_amt,mpesa_sender);
+					mpesa_msisdn,mpesa_trx_date,mpesa_trx_time,mpesa_amt,mpesa_sender,null,null);
 		}catch(Exception e){
 			logger.error("Exception " + e);
 			return new ResponseEntity<String>(e.getMessage(),HttpStatus.BAD_REQUEST);
@@ -90,6 +91,25 @@ public class MifosMpesaController {
 		return new ResponseEntity<String>(responseMessage,HttpStatus.OK);
 		
 	}
+	@RequestMapping(value = "/transactiondetail", method = RequestMethod.POST)
+	public @ResponseBody ResponseEntity<String> storeTransactionDetail(@QueryParam("id") final Long id,@QueryParam("orig") final String orig,
+			@QueryParam("dest") final String dest,@QueryParam("tstamp") final String tstamp,@QueryParam("text") final String text,@QueryParam("user")
+			final String user,@QueryParam("pass") final String pass,@QueryParam("mpesa_code") final String mpesa_code, @QueryParam("mpesa_acc")
+			final String mpesa_acc,@QueryParam("mpesa_msisdn") final String mpesa_msisdn,@QueryParam("mpesa_trx_date") final Date mpesa_trx_date,@QueryParam("mpesa_trx_time")
+			final String mpesa_trx_time,@QueryParam("mpesa_amt") final BigDecimal mpesa_amt,@QueryParam("mpesa_sender") final String mpesa_sender,
+			@QueryParam("mpesa_trx_type") final String mpesa_trx_type,@QueryParam("office_Id") final Long office_Id){
+		String responseMessage = "";
+		try{
+			responseMessage = this.mpesaBridgeService.storeTransactionDetails(id,orig,dest,tstamp,text,user,pass,mpesa_code,mpesa_acc,
+					mpesa_msisdn,mpesa_trx_date,mpesa_trx_time,mpesa_amt,mpesa_sender,mpesa_trx_type,office_Id);
+		}catch(Exception e){
+			logger.error("Exception " + e);
+			return new ResponseEntity<String>(e.getMessage(),HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<String>(responseMessage,HttpStatus.OK);
+		
+	}
+	
 	
 	@RequestMapping(value = "/mpesatransactions", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<ArrayList<Mpesa>> retriveAllTransactions(Long  officeId){
