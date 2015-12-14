@@ -28,48 +28,30 @@ public interface MpesaBridgeRepository extends CrudRepository<Mpesa, Long>{
 	List<Mpesa> fetchTransactionInfoByNationalId(@Param("nationalId") String nationalId);
 	
 	
-	@Query("from Mpesa mpesa WHERE    mpesa.transactionDate between :FromDate and :ToDate and mpesa.officeId =:officeId " )
+	@Query("from Mpesa mpesa WHERE    mpesa.transactionDate between :FromDate and :ToDate and mpesa.officeId =:officeId  and mpesa.type!='WithDraw' " )
 	List<Mpesa>LikeSearch(@Param("FromDate") Date FromDate,@Param("ToDate") Date ToDate,@Param("officeId") Long officeId );
     
-	@Query("from Mpesa mpesa WHERE mpesa.mobileNo like %:phoneNo%  and mpesa.status=:status and mpesa.transactionDate between :FromDate and :ToDate and mpesa.officeId =:officeId" )
+	@Query("from Mpesa mpesa WHERE mpesa.mobileNo like %:phoneNo%  and mpesa.status=:status and mpesa.transactionDate between :FromDate and :ToDate and mpesa.officeId in(:officeId,0)  and mpesa.type!='WithDraw' " )
+	List<Mpesa>UnMappedOffice(@Param("status") String status,@Param("phoneNo") String phoneNo,@Param("FromDate") Date FromDate,@Param("ToDate") Date ToDate,@Param("officeId") Long officeId);
+    
+	@Query("from Mpesa mpesa WHERE mpesa.mobileNo like %:phoneNo%  and mpesa.status=:status and mpesa.transactionDate between :FromDate and :ToDate and mpesa.officeId =:officeId and mpesa.type!='WithDraw' " )
 	List<Mpesa>Exactsearch(@Param("status") String status,@Param("phoneNo") String phoneNo,@Param("FromDate") Date FromDate,@Param("ToDate") Date ToDate,@Param("officeId") Long officeId);
     
-    @Query("from Mpesa mpesa WHERE mpesa.mobileNo like %:phoneNo%  and mpesa.status=:status")
-    List<Mpesa>search(@Param("status") String status,@Param("phoneNo") String phoneNo);
     
-	@Query("from Mpesa mpesa WHERE mpesa.mobileNo like %:phoneNo% and  mpesa.transactionDate between :FromDate and :ToDate and mpesa.officeId =:officeId ")
+	@Query("from Mpesa mpesa WHERE mpesa.mobileNo like %:phoneNo% and  mpesa.transactionDate between :FromDate and :ToDate and mpesa.officeId =:officeId and mpesa.type!='WithDraw' ")
 	List<Mpesa>likesearch(@Param("phoneNo") String phoneNo,@Param("FromDate") Date FromDate,@Param("ToDate") Date ToDate,@Param("officeId") Long officeId);
 	
-	@Query("from Mpesa mpesa WHERE  mpesa.status=:status and mpesa.transactionDate between :FromDate and :ToDate and mpesa.officeId =:officeId" )
+	@Query("from Mpesa mpesa WHERE  mpesa.status=:status and mpesa.transactionDate between :FromDate and :ToDate and mpesa.officeId =:officeId and  mpesa.type!='WithDraw' " )
 	List<Mpesa>search(@Param("status") String status,@Param("FromDate") Date FromDate,@Param("ToDate") Date ToDate,@Param("officeId") Long officeId);
     
-	@Query("from Mpesa mpesa WHERE mpesa.transactionDate <= :ToDate and mpesa.officeId =:officeId " )
-	List<Mpesa>toDateSearch( @Param("ToDate") Date ToDate,@Param("officeId") Long officeId);
+	@Query("from Mpesa mpesa WHERE  mpesa.status=:status and mpesa.transactionDate between :FromDate and :ToDate and mpesa.officeId in(:officeId,0)and  mpesa.type!='WithDraw' " )
+	List<Mpesa>unmappedofficed(@Param("status") String status,@Param("FromDate") Date FromDate,@Param("ToDate") Date ToDate,@Param("officeId") Long officeId);
+    
 	
-	@Query("from Mpesa mpesa Where mpesa.mobileNo like %:phoneNo% and transactionDate <= :ToDate and mpesa.officeId =:officeId ")
-	List<Mpesa>searchByMobileNoTxnDate(@Param("phoneNo") String phoneNo,@Param("ToDate") Date ToDate,@Param("officeId") Long officeId); 
-
     
 
 
-    
-	//    @Query("from Mpesa mpesa WHERE " +
-//    		"" +
-//    		"if(:phoneNo!=null,mpesa.mobileNo like %:phoneNo%,' ') And if(:status!=null,mpesa.status =:status,' ')"
-//			 +"And if(:FromDate!=null,if(:ToDate!=null, mpesa.transactionDate between :FromDate and :ToDate,' '),' ')")
-//    
-//	List<Mpesa>search(@Param("status") String status,@Param("phoneNo") String phoneNo,@Param("FromDate") Date FromDate,@Param("ToDate") Date ToDate);
-////	
-//	
-//   @Query("from Mpesa mpesa WHERE mpesa.mobileNo like %:phoneNo% and mpesa.status =:status and mpesa.transactionDate between :FromDate and :ToDate")
-//		   	
-//	List<Mpesa>search(@Param("status") String status,@Param("phoneNo") String phoneNo,@Param("FromDate") Date FromDate,@Param("ToDate") Date ToDate);
-//   
-//    @Query("from Mpesa mpesa WHERE mpesa.mobileNo like if(:phoneNo!=null,:phoneNo,' ')" +" union "+
-//   		   "from Mpesa mpesa WHERE  mpesa.status = if(:status!=null,:status,' ')"+"  union  "+
-//		   "from Mpesa mpesa WHERE mpesa.transactionDate between if (:FromDate!=null,:FromDate,' ') and :ToDate")
-//	List<Mpesa>search(@Param("status") String status,@Param("phoneNo") String phoneNo,@Param("FromDate") Date FromDate,@Param("ToDate") Date ToDate);
-
+  
    		    		 
 
 	

@@ -29,6 +29,7 @@ import org.mifosplatform.mpesa.service.MpesaBridgeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +45,11 @@ public class MifosMpesaController {
 	private final Logger logger = LoggerFactory.getLogger(MifosMpesaController.class);
 	private MpesaBridgeService mpesaBridgeService;
 	
+	@Value("${mpesausername}")
+	private String mpesausername;
+	
+	@Value("${mpesapassword}")
+	private String mpesapassword;
 	
 	@Autowired
 	public MifosMpesaController(final MpesaBridgeService mpesaBridgeService) {
@@ -62,9 +68,17 @@ public class MifosMpesaController {
 			final String mpesa_trx_time,@QueryParam("mpesa_amt") final BigDecimal mpesa_amt,@QueryParam("mpesa_sender") final String mpesa_sender){
 		String responseMessage = "";
 		try{
-			if(user.equalsIgnoreCase("caritas") && pass.equalsIgnoreCase("nairobi")){
+			String time=" ";
+            if(tstamp!=null){
+            	String[] date=tstamp.split(" ");            
+              if(date.length>=1){            
+            	time=date[0];
+            }
+            }
+			Long officeId=(long) 0;
+			if(user.equalsIgnoreCase(mpesausername) && pass.equalsIgnoreCase(mpesapassword)){
 				responseMessage = this.mpesaBridgeService.storeTransactionDetails(id,orig,dest,tstamp,text,user,pass,mpesa_code,mpesa_acc,
-					mpesa_msisdn,mpesa_trx_date,mpesa_trx_time,mpesa_amt,mpesa_sender,null,null);
+					mpesa_msisdn,mpesa_trx_date,time +" "+mpesa_trx_time,mpesa_amt,mpesa_sender,"PaidIn",officeId);
 			}
 		}catch(Exception e){
 			logger.error("Exception " + e);
@@ -82,8 +96,18 @@ public class MifosMpesaController {
 			){
 		String responseMessage = "";
 		try{
+			String time=" ";
+			if(tstamp!=null){
+            String[] date=tstamp.split(" ");        
+                if(date.length>=1){            
+            	time=date[0];
+            }
+			}
+			Long officeId=(long) 0;
+			if(user.equalsIgnoreCase(mpesausername) && pass.equalsIgnoreCase(mpesapassword)){
 			responseMessage = this.mpesaBridgeService.storeTransactionDetails(id,orig,dest,tstamp,text,user,pass,mpesa_code,mpesa_acc,
-					mpesa_msisdn,mpesa_trx_date,mpesa_trx_time,mpesa_amt,mpesa_sender,null,null);
+					mpesa_msisdn,mpesa_trx_date,time+" "+mpesa_trx_time,mpesa_amt,mpesa_sender,"PaidIn",officeId);
+			}
 		}catch(Exception e){
 			logger.error("Exception " + e);
 			return new ResponseEntity<String>(e.getMessage(),HttpStatus.BAD_REQUEST);
@@ -111,7 +135,7 @@ public class MifosMpesaController {
 	}
 	
 	
-	@RequestMapping(value = "/mpesatransactions", method = RequestMethod.GET)
+	/*@RequestMapping(value = "/mpesatransactions", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<ArrayList<Mpesa>> retriveAllTransactions(Long  officeId){
 		ArrayList<Mpesa> transactionDetails = null;
 		try{
@@ -120,7 +144,7 @@ public class MifosMpesaController {
 			logger.error("Exception " + e);
 		}
 		return new ResponseEntity<ArrayList<Mpesa>>(transactionDetails,HttpStatus.OK);
-	}
+	}*/
 	
 	@RequestMapping(value = "/getunmappedtransactions", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<Collection<Mpesa>> retriveUnmappedTransactions(@QueryParam("officeId")final Long officeId){
@@ -130,7 +154,7 @@ public class MifosMpesaController {
 		 responseHeaders.set("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS");
 		 //responseHeaders.setOrigin("*");
 		try{
-			this.mpesaBridgeService.retriveAllTransactions(officeId);
+			//this.mpesaBridgeService.retriveAllTransactions(officeId);
 			transactionDetails = this.mpesaBridgeService.retriveUnmappedTransactions(officeId);
 		}catch(Exception e){
 			logger.error("Exception " + e);
@@ -171,6 +195,11 @@ public class MifosMpesaController {
 			    if(FromDate!=null&&FromDate!=""){
 			    FromDate1 = formatter.parse(FromDate);			    
 			    }
+			    else{		    	
+	        	    	Date dt =new Date(0);
+	        	    	FromDate1=dt;
+	        	    }
+			    
 			    Date ToDate1    = formatter.parse(ToDate);
 				transactionDetails = this.mpesaBridgeService.searchMpesaDetail(status,mobileNo,FromDate1,ToDate1,officeId);
 						}catch(Exception e){

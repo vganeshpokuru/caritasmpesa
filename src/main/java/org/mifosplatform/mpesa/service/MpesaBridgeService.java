@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface MpesaBridgeService {
 	
-	public ArrayList<Mpesa> retriveAllTransactions(Long officeId);
+	//public ArrayList<Mpesa> retriveAllTransactions(Long officeId);
 
 	public String storeTransactionDetails(final Long id, final String origin, final String dest,final String tStamp, final String text, final String user, 
 			final String pass, final String mpesaCode, final String mpesaAccount, final String mobileNo,final Date txnDate, final String txnTime, 
@@ -24,6 +24,7 @@ public interface MpesaBridgeService {
 	
 	
 	public Collection<Mpesa>searchMpesaDetail(String status,String mobileNo,Date fromDate,Date toDate,Long officeId);
-
+ 
+	public String branchMap(String MobileNo,String NationalId);
 	
 }
