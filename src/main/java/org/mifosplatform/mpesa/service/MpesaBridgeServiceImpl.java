@@ -10,6 +10,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
 
+import org.hibernate.validator.internal.metadata.aggregated.ValidatableParametersMetaData;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -66,7 +67,12 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 		Mpesa mpesa = null;
 		Mpesa response = null;
 		String responseData = "";
-		try {
+		
+		List<Mpesa> validateForTransactionId = mpesaBridgeRepository.validateForTransactionId(mpesaCode);
+		
+		if(validateForTransactionId.size()<0 || validateForTransactionId.isEmpty())
+		{
+		  try {
 			if (id != null && mpesaCode != null
 					&& !mpesaCode.equalsIgnoreCase("")) {
 				mpesa = new Mpesa();
@@ -121,6 +127,10 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 		} catch (Exception e) {
 			logger.error("Exception while storeTransactionDetails " + e);
 			return responseData = e.getMessage();
+		}
+	  }
+	 else {
+		    responseData =  mpesaCode;
 		}
 		return responseData;
 	}

@@ -48,11 +48,9 @@ public interface MpesaBridgeRepository extends CrudRepository<Mpesa, Long>{
 	List<Mpesa>unmappedofficed(@Param("status") String status,@Param("FromDate") Date FromDate,@Param("ToDate") Date ToDate,@Param("officeId") Long officeId);
     
 	
-    
+    @Query("from Mpesa mpesa WHERE mpesa.transactionCode =:transactionCode")
+    List<Mpesa>validateForTransactionId(@Param("transactionCode") String transactionCode);
 
-
-  
-   		    		 
 
 	
 }

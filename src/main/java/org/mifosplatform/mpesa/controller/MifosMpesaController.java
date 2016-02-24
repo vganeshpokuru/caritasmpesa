@@ -80,6 +80,9 @@ public class MifosMpesaController {
 				responseMessage = this.mpesaBridgeService.storeTransactionDetails(id,orig,dest,tstamp,text,user,pass,mpesa_code,mpesa_acc,
 					mpesa_msisdn,mpesa_trx_date,time +" "+mpesa_trx_time,mpesa_amt,mpesa_sender,"PaidIn",officeId);
 			}
+			if(responseMessage.equalsIgnoreCase(mpesa_code)){
+				return new ResponseEntity<String>("CONFLICT:" +responseMessage,HttpStatus.CONFLICT);
+			}
 		}catch(Exception e){
 			logger.error("Exception " + e);
 			return new ResponseEntity<String>(e.getMessage(),HttpStatus.BAD_REQUEST);
@@ -126,10 +129,17 @@ public class MifosMpesaController {
 		try{
 			responseMessage = this.mpesaBridgeService.storeTransactionDetails(id,orig,dest,tstamp,text,user,pass,mpesa_code,mpesa_acc,
 					mpesa_msisdn,mpesa_trx_date,mpesa_trx_time,mpesa_amt,mpesa_sender,mpesa_trx_type,office_Id);
+			
+			if(responseMessage.equalsIgnoreCase(mpesa_code)){
+				return new ResponseEntity<String>("CONFLICT:" +responseMessage,HttpStatus.CONFLICT);
+			}
+			
 		}catch(Exception e){
 			logger.error("Exception " + e);
 			return new ResponseEntity<String>(e.getMessage(),HttpStatus.BAD_REQUEST);
 		}
+		
+		
 		return new ResponseEntity<String>(responseMessage,HttpStatus.OK);
 		
 	}
