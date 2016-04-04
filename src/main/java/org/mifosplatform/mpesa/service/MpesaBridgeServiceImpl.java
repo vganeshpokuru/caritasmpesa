@@ -103,7 +103,10 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 						nationaId = accNum.substring(0, accNum.indexOf(" "));
 					}
 				}
-				String MobileNo = mobileNo.substring(3, mobileNo.length());
+				String MobileNo = null;
+				if(!mobileNo.isEmpty()){
+					MobileNo = mobileNo.substring(3, mobileNo.length());
+				}
 				String result = branchMap(MobileNo, nationaId);
 				String data[] = result.split("=");
 				mpesa.setStatus(data[2]);
