@@ -44,8 +44,8 @@ public interface MpesaBridgeRepository extends CrudRepository<Mpesa, Long>{
 	@Query("from Mpesa mpesa WHERE  mpesa.status=:status and mpesa.transactionDate between :FromDate and :ToDate and mpesa.officeId =:officeId and  mpesa.type!='WithDraw' " )
 	List<Mpesa>search(@Param("status") String status,@Param("FromDate") Date FromDate,@Param("ToDate") Date ToDate,@Param("officeId") Long officeId);
     
-	@Query("from Mpesa mpesa WHERE  mpesa.status=:status and mpesa.transactionDate between :FromDate and :ToDate and mpesa.officeId in(:officeId,0)and  mpesa.type!='WithDraw' " )
-	List<Mpesa>unmappedofficed(@Param("status") String status,@Param("FromDate") Date FromDate,@Param("ToDate") Date ToDate,@Param("officeId") Long officeId);
+	@Query("from Mpesa mpesa WHERE  mpesa.status=:status and mpesa.transactionDate between :FromDate and :ToDate and mpesa.officeId in(:officeId)and  mpesa.type!='WithDraw' " )
+	List<Mpesa>unmappedofficed(@Param("status") String status,@Param("FromDate") Date FromDate,@Param("ToDate") Date ToDate,@Param("officeId") List<Long> officeId);
     
 	
     @Query("from Mpesa mpesa WHERE mpesa.transactionCode =:transactionCode")

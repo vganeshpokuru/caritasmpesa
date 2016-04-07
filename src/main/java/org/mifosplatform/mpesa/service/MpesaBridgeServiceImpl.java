@@ -1,10 +1,14 @@
 package org.mifosplatform.mpesa.service;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -67,7 +71,22 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 		Mpesa mpesa = null;
 		Mpesa response = null;
 		String responseData = "";
+		//String formattedTxnDate = txnDate.toString();
 		
+	    DateFormat source = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+	    Date newDate=null;  // new transaction date after formatting 
+	    
+		try {
+			if(officeId == 0){                           //if office id is =0 means request comes from safaricom which doesn't contains office id initially
+			newDate = source.parse(tStamp);             //client mapping is done based on national id and mobile number 
+			}else{
+				newDate = txnDate;         // else contains it comes from file upload and bidefualt office is - headoffice , user can changes it. but it  
+			}                              // contains office compulsory
+		} catch (ParseException e1) {
+			e1.printStackTrace();
+		}
+		
+			 
 		List<Mpesa> validateForTransactionId = mpesaBridgeRepository.validateForTransactionId(mpesaCode);
 		
 		if(validateForTransactionId.size()<0 || validateForTransactionId.isEmpty())
@@ -86,7 +105,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 				mpesa.setTransactionCode(mpesaCode);
 				mpesa.setAccountName(mpesaAccount);
 				mpesa.setMobileNo(mobileNo);
-				mpesa.setTransactionDate(txnDate);
+				mpesa.setTransactionDate(newDate);
 				mpesa.setTransactionTime(txnTime);
 				mpesa.setTransactionAmount(mpesaAmount);
 				mpesa.setSender(sender);
@@ -103,7 +122,10 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 						nationaId = accNum.substring(0, accNum.indexOf(" "));
 					}
 				}
-				String MobileNo = mobileNo.substring(3, mobileNo.length());
+				String MobileNo = null;
+				if((mobileNo != null) && ! (mobileNo.isEmpty())){
+					MobileNo = mobileNo.substring(3, mobileNo.length());
+				}
 				String result = branchMap(MobileNo, nationaId);
 				String data[] = result.split("=");
 				mpesa.setStatus(data[2]);
@@ -273,9 +295,14 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 			if (mobileNo.equals("") && status.equals("")) {
 				TransactionList = this.mpesaBridgeRepository.LikeSearch(
 						fromDate, toDate, officeId);			}
+			ArrayList<Long> officeIdList = new ArrayList<Long>();
+			officeIdList.add(new Long(0));
+			if(officeId.longValue() != 0){
+				officeIdList.add(officeId);
+			}
 			if (mobileNo.equals("") && status != null && status != "") {
 				if (status.equals("UNMP")) {
-					TransactionList = this.mpesaBridgeRepository.unmappedofficed(status, fromDate, toDate, officeId);
+					TransactionList = this.mpesaBridgeRepository.unmappedofficed(status, fromDate, toDate, officeIdList);
 				} else {
 					TransactionList = this.mpesaBridgeRepository.search(status,fromDate, toDate, officeId);							
 				}
