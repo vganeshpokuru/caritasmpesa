@@ -2,6 +2,7 @@ package org.mifosplatform.mpesa.configuration;
 
 
 import org.mifosplatform.mpesa.domain.Mpesa;
+import org.mifosplatform.mpesa.domain.MpesaBranchMapping;
 import org.mifosplatform.mpesa.domain.MpesaTransaction;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.orm.jpa.EntityScan;
@@ -19,7 +20,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 })
 @EntityScan(basePackageClasses = {
         Mpesa.class,
-        MpesaTransaction.class
+        MpesaTransaction.class,
+        MpesaBranchMapping.class
         
 })
 @ComponentScan(basePackages = {

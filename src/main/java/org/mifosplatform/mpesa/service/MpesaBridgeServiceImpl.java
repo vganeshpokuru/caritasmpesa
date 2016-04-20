@@ -20,6 +20,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.mpesa.configuration.ClientHelper;
 import org.mifosplatform.mpesa.domain.Mpesa;
+import org.mifosplatform.mpesa.domain.MpesaBranchMapping;
+import org.mifosplatform.mpesa.repository.MpesaBranchMappingRepository;
 import org.mifosplatform.mpesa.repository.MpesaBridgeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,12 +53,14 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 			.getLogger(MpesaBridgeServiceImpl.class);
 
 	private final MpesaBridgeRepository mpesaBridgeRepository;
+	private final MpesaBranchMappingRepository mpesaBranchMappingRepository;
 
 	@Autowired
 	public MpesaBridgeServiceImpl(
-			final MpesaBridgeRepository mpesaBridgeRepository) {
+			final MpesaBridgeRepository mpesaBridgeRepository, final MpesaBranchMappingRepository mpesaBranchMappingRepository ) {
 		super();
 		this.mpesaBridgeRepository = mpesaBridgeRepository;
+		this.mpesaBranchMappingRepository = mpesaBranchMappingRepository;
 	}
 
 	@Override
@@ -67,21 +71,32 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 			final String mpesaAccount, final String mobileNo,
 			final Date txnDate, final String txnTime,
 			final BigDecimal mpesaAmount, final String sender,
-			final String mpesaTxnType, final Long officeId) {
-		Mpesa mpesa = null;
-		Mpesa response = null;
-		String responseData = "";
-		//String formattedTxnDate = txnDate.toString();
+			final String mpesaTxnType, Long officeId) {
+		
+		    Mpesa mpesa = null;
+		    Mpesa response = null;
+		    String responseData = "";
+		
+		    boolean isAccountNoFromExcel = false;     //We are getting account no from post request and excel as well so for differentiating it.
+		
 		
 	    DateFormat source = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
 	    Date newDate=null;  // new transaction date after formatting 
 	    
 		try {
 			if(officeId == 0){                           //if office id is =0 means request comes from safaricom which doesn't contains office id initially
-			newDate = source.parse(tStamp);             //client mapping is done based on national id and mobile number 
+			    
+				MpesaBranchMapping getOfficeDetails = this.mpesaBranchMappingRepository.getOfficeIdFromDestNumber(dest);
+				if(getOfficeDetails != null){
+					officeId = getOfficeDetails.getOffice_id();  //if post request comes then we are mapping dest id in mapping table and getting office Id           		
+				}
+				
+				newDate = source.parse(tStamp);
+			    //client mapping is done based on national id and mobile number 
 			}else{
-				newDate = txnDate;         // else contains it comes from file upload and bidefualt office is - headoffice , user can changes it. but it  
-			}                              // contains office compulsory
+				newDate = txnDate; 
+				isAccountNoFromExcel = true;  // else contains it comes from file upload and bidefualt office is - headoffice , user can changes it. but it  
+			}                                 // contains office compulsory
 		} catch (ParseException e1) {
 			e1.printStackTrace();
 		}
@@ -111,25 +126,26 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 				mpesa.setSender(sender);
 				mpesa.setType(mpesaTxnType);
 				mpesa.setOfficeId(officeId);
-				String nationaId = null;
-				if (officeId != 0) {
+				String accountNo = null;
+				if (isAccountNoFromExcel == true) {  //if true means account no coming from excel sheet 
 					if (text.contains("Acc. ")) {
-						nationaId = text.substring(text.indexOf("Acc.") + "Acc.".length()).trim();
+						accountNo = text.substring(text.indexOf("Acc.") + "Acc.".length()).trim();
 					}
-				} else {
+				} else { // isAccountNoFromExcel is false so its coming from post request 
 					if (text.contains("Account Number")) {
 						String accNum = text.substring(text.indexOf("Account Number")+ "Account Number".length()).trim();						
-						nationaId = accNum.substring(0, accNum.indexOf(" "));
+						accountNo = accNum.substring(0, accNum.indexOf(" "));
 					}
 				}
 				String MobileNo = null;
 				if((mobileNo != null) && ! (mobileNo.isEmpty())){
 					MobileNo = mobileNo.substring(3, mobileNo.length());
 				}
-				String result = branchMap(MobileNo, nationaId);
+				String result = branchMap(MobileNo, accountNo, officeId);
 				String data[] = result.split("=");
 				mpesa.setStatus(data[2]);
 				mpesa.setClientName(data[0]);
+				mpesa.setClientExternalId(data[4]);
 				if(officeId == 0){					
 				if (!data[1].equals(" ")) {
 					mpesa.setOfficeId(Long.parseLong(data[1]));
@@ -188,17 +204,55 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 	}
 
 		@Override
-	public String branchMap(String MobileNo, String nationalId) {
-		Boolean nationalIdSearch = false;
+	public String branchMap(String MobileNo, String accountNo, Long officeId) {
+		Boolean externalIdSearch = false;
 		Client client = null;
 		String authenticationKey = null;
 		WebResource webResource = null;
 		String details = "";
+		String clientExternalId = null;
+		String officeExternalId = null;
 		try {
 			authenticationKey = loginIntoServerAndGetBase64EncodedAuthenticationKey();
-			if (nationalId != null && nationalId != "") {
+			if (accountNo != null && accountNo != "" && officeId != 0) {
 				client = ClientHelper.createClient();
-				webResource = client.resource(mifosurl+ "/mifosng-provider/api/v1/search?query=" + nationalId+ "&resource=clients");
+				
+				if(officeId != null && officeId !=0){
+					webResource = client.resource(mifosurl+ "/mifosng-provider/api/v1/offices/" +officeId);
+					ClientResponse response = webResource.header("X-mifos-Platform-TenantId", tenantIdentifier)
+											  .header("Content-Type", "application/json")
+											  .header("Authorization", "Basic " + authenticationKey)
+											  .get(ClientResponse.class);	
+					if (response.getStatus() != 200) {
+						throw new RuntimeException("Failed : HTTP error code : "
+								+ response.getStatus());
+					}
+					
+					String officeDetailsByOfficeId = response	.getEntity(String.class);
+					String[] officeData = officeDetailsByOfficeId.split(",");
+					
+					
+					if(officeData !=null && officeData.length > 0){
+						for(int i=0; i<= officeData.length ; i++){
+								if(officeData[i].contains("externalId")){
+									String[] office = officeData[i].split(":");
+							               officeExternalId = office[1].replaceAll("^\"|\"$", "");
+							              break; 
+								}
+							}
+						}
+					
+					
+					if(officeExternalId != null || officeExternalId !=""){
+						
+						clientExternalId = officeExternalId.concat(accountNo);
+						
+					}
+					
+					
+				}
+				
+				webResource = client.resource(mifosurl+ "/mifosng-provider/api/v1/search?query=" + clientExternalId+ "&resource=clients");
 				ClientResponse response = webResource
 						.header("X-mifos-Platform-TenantId", tenantIdentifier)
 						.header("Content-Type", "application/json")
@@ -214,18 +268,18 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 					if (clientsData.size() > 0) {
 					   for (int j = 0; j < clientsData.size(); j++) {
 						JSONObject clientData = (JSONObject) clientsData.get(j);
-					if (clientData != null&& clientData.get("entityType").equals("CLIENT")&& clientData.get("entityNationalId") != null) {									
-					if (clientData.get("entityNationalId").equals(nationalId)|| clientData.get("entityNationalId") == nationalId) {										
+					if (clientData != null && clientData.get("entityType").equals("CLIENT")) {									
+					if (clientData.get("entityExternalId").equals(clientExternalId)) {										
 							String ClientName = (String) clientData	.get("entityName");
-							nationalIdSearch = true;
-							details = ClientName + "="+ clientData.get("parentId") + "="+ "CMP" + "="+ clientData.get("entityId");										
+							externalIdSearch = true;
+							details = ClientName + "="+ clientData.get("parentId") + "="+ "CMP" + "="+ clientData.get("entityId") + "=" + clientData.get("entityExternalId");										
 					 }
 				   }
 				 }
 				}
 			  }
 			}
-			if (!nationalIdSearch) {
+			if (!externalIdSearch) {
 				String mobileNowithZero = 0 + MobileNo;
 				client = ClientHelper.createClient();
 				webResource = client.resource(mifosurl+ "/mifosng-provider/api/v1/search?query=" + MobileNo+ "&resource=clients");
@@ -251,13 +305,13 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 					details = ClientName + "="+ clientData.get("parentId") + "="+ "CMP" + "="+ clientData.get("entityId");				
 				}			
 				else {						
-					details = " " + "=" + " " + "=" + "UNMP"+ "=" + " ";
+					details = " " + "=" + " " + "=" + "UNMP"+ "=" + " " + "=" + " " + "=" + " ";
 				}}
 				else if (clientData != null) {	
-					details = " " + "=" + " " + "=" + "UNMP" + "="+ " ";
+					details = " " + "=" + " " + "=" + "UNMP" + "="+ " " + "=" + " ";
 				}}
 				}else {
-					details = " " + "=" + " " + "=" + "UNMP" + "=" + " ";
+					details = " " + "=" + " " + "=" + "UNMP" + "=" + " " + "=" + " ";
 				}	
 				}
 			  }					

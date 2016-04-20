@@ -25,6 +25,6 @@ public interface MpesaBridgeService {
 	
 	public Collection<Mpesa>searchMpesaDetail(String status,String mobileNo,Date fromDate,Date toDate,Long officeId);
  
-	public String branchMap(String MobileNo,String NationalId);
+	public String branchMap(String MobileNo,String accountNo, Long officeId);
 	
 }

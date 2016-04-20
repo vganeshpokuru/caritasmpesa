@@ -34,6 +34,9 @@ public class Mpesa {
 	
 	@Column(name="client_name")
 	private String clientName;
+	
+	@Column(name="client_external_id")
+	private String clientExternalId;
 
 	@Column(name="time_stamp")
 	private String timeStamp;
@@ -238,6 +241,13 @@ public class Mpesa {
 		this.officeId = officeId;
 	}
 	
+	public String getClientExternalId() {
+		return clientExternalId;
+	}
+
+	public void setClientExternalId(String clientExternalId) {
+		this.clientExternalId = clientExternalId;
+	}
 
 	
 }
