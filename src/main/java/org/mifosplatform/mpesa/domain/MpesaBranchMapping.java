@@ -9,7 +9,7 @@ import javax.persistence.Table;
 
 
 @Entity 
-@Table(name="mpesatxnbranchmapping")
+@Table(name="MpesaTxnBranchMapping")
 public class MpesaBranchMapping {
 
 	@Id
