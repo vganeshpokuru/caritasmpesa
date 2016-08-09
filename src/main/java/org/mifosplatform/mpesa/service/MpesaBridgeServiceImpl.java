@@ -280,7 +280,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 			  }
 			}
 			if (!externalIdSearch) {
-				String mobileNowithZero = 0 + MobileNo;
+				String mobileNowithZero = MobileNo;
 				client = ClientHelper.createClient();
 				webResource = client.resource(mifosurl+ "/mifosng-provider/api/v1/search?query=" + MobileNo+ "&resource=clients");
 				ClientResponse clientsDatasearchByMobileNo = webResource
