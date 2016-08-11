@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.mifosplatform.mpesa.domain.Mpesa;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -18,12 +19,12 @@ public interface MpesaBridgeService {
 			final String pass, final String mpesaCode, final String mpesaAccount, final String mobileNo,final Date txnDate, final String txnTime, 
 			final BigDecimal mpesaAmount, final String sender,final String mpesaTxnType,final Long officeId);
 
-	public Collection<Mpesa> retriveUnmappedTransactions(Long officeId);
+	public Page<Mpesa> retriveUnmappedTransactions(Long officeId, Integer offset, Integer limit);
 	
 	public List<Mpesa>Payment(Long Id);
 	
 	
-	public Collection<Mpesa>searchMpesaDetail(String status,String mobileNo,Date fromDate,Date toDate,Long officeId);
+	public Page<Mpesa> searchMpesaDetail(String status,String mobileNo,Date fromDate,Date toDate,Long officeId, Integer offset, Integer limit);
  
 	public String branchMap(String MobileNo,String accountNo, Long officeId);
 	

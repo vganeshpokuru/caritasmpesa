@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.ws.rs.QueryParam;
@@ -30,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -230,20 +232,23 @@ public class MifosMpesaController {
 	}*/
 	
 	@RequestMapping(value = "/getunmappedtransactions", method = RequestMethod.GET)
-	public @ResponseBody ResponseEntity<Collection<Mpesa>> retriveUnmappedTransactions(@QueryParam("officeId")final Long officeId){
-		Collection<Mpesa> transactionDetails = null;
+	public @ResponseBody ResponseEntity<Collection<Mpesa>> retriveUnmappedTransactions(@QueryParam("officeId")final Long officeId,
+			@QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit){
+		Page<Mpesa> transactionDetails = null;
 		 HttpHeaders responseHeaders = new HttpHeaders();
 		 responseHeaders.set("Access-Control-Allow-Origin","*");
 		 responseHeaders.set("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS");
 		 //responseHeaders.setOrigin("*");
 		try{
 			//this.mpesaBridgeService.retriveAllTransactions(officeId);
-			transactionDetails = this.mpesaBridgeService.retriveUnmappedTransactions(officeId);
+			transactionDetails = this.mpesaBridgeService.retriveUnmappedTransactions(officeId, offset, limit);
 		}catch(Exception e){
 			logger.error("Exception " + e);
 		}
-		
-		return new ResponseEntity<Collection<Mpesa>>(transactionDetails,HttpStatus.OK);
+		HashMap<String, Object> responseData= new HashMap<String, Object>();
+		responseData.put("totalFilteredRecords", transactionDetails.getTotalElements());
+		responseData.put("pageItems", transactionDetails.getContent());
+		return new ResponseEntity(responseData,HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/postpayment", method = RequestMethod.GET)
@@ -264,11 +269,11 @@ public class MifosMpesaController {
 		
 	@RequestMapping(value = "/Search", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<Collection<Mpesa>> Search( @QueryParam("status") final String status,
-			@QueryParam("transactionDate") final String FromDate,@QueryParam("transactionDate") final String ToDate,
+			@QueryParam("FromDate") final String FromDate,@QueryParam("ToDate") final String ToDate,
 			@QueryParam("mobileNo") final String mobileNo,
-			@QueryParam("officeId")final  Long officeId){
+			@QueryParam("officeId")final  Long officeId, @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit){
 		 HttpHeaders responseHeaders = new HttpHeaders();
-		Collection<Mpesa>transactionDetails=null;
+		 Page<Mpesa>transactionDetails=null;
 		 responseHeaders.set("Access-Control-Allow-Origin","*");
 		 responseHeaders.set("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS");
 		 //responseHeaders.setOrigin("*");
@@ -284,14 +289,16 @@ public class MifosMpesaController {
 	        	    }
 			    
 			    Date ToDate1    = formatter.parse(ToDate);
-				transactionDetails = this.mpesaBridgeService.searchMpesaDetail(status,mobileNo,FromDate1,ToDate1,officeId);
+				transactionDetails = this.mpesaBridgeService.searchMpesaDetail(status,mobileNo,FromDate1,ToDate1,officeId, offset, limit);
 						}catch(Exception e){
 				logger.error("Exception " + e);
 			}
+		 HashMap<String, Object> responseData= new HashMap<String, Object>();
+		 responseData.put("totalFilteredRecords", transactionDetails.getTotalElements());
+		 responseData.put("pageItems", transactionDetails.getContent());
 		
-		return new ResponseEntity<Collection<Mpesa>>(transactionDetails,HttpStatus.OK);
+		return new ResponseEntity(responseData,HttpStatus.OK);
 	}		
 
-	
 	
 }

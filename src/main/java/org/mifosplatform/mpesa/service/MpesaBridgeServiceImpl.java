@@ -27,6 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -321,10 +323,13 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 		return details;
 	}								
 	@Override
-	public Collection<Mpesa> retriveUnmappedTransactions(Long officeId) {
-		Collection<Mpesa> unmappedTransactionList = null;
+	public Page<Mpesa> retriveUnmappedTransactions(Long officeId, Integer offset, Integer limit) {
+		Page<Mpesa> unmappedTransactionList = null;
 		try {
-			unmappedTransactionList = this.mpesaBridgeRepository.retriveUnmappedTransactions(officeId);					
+			int pageNo = (offset == null) ? offset = 0 : Integer.divideUnsigned(offset, 15);
+			limit = (limit == null || limit == 0 ) ? limit = Integer.valueOf(15) : limit;
+			PageRequest pageable = new PageRequest(pageNo, limit);
+			unmappedTransactionList = this.mpesaBridgeRepository.retriveUnmappedTransactions(officeId, pageable);					
 		} catch (Exception e) {
 			logger.error("Exception while retriveUnmappedTransactions " + e);
 		}
@@ -342,13 +347,17 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 	}
 
 	@Override
-	public Collection<Mpesa> searchMpesaDetail(String status, String mobileNo,
-			Date fromDate, Date toDate, Long officeId) {
-		Collection<Mpesa> TransactionList = null;
+	public Page<Mpesa> searchMpesaDetail(String status, String mobileNo,
+			Date fromDate, Date toDate, Long officeId, Integer offset, Integer limit) {
+		Page<Mpesa> TransactionList = null;
 		try {
+			int pageNo = (offset == null) ? offset = 0 : Integer.divideUnsigned(offset, 15);
+			limit = (limit == null || limit == 0 ) ? limit = Integer.valueOf(15) : limit;
+			PageRequest pageable = new PageRequest(pageNo, limit);
 			if (mobileNo.equals("") && status.equals("")) {
 				TransactionList = this.mpesaBridgeRepository.LikeSearch(
-						fromDate, toDate, officeId);			}
+						fromDate, toDate, officeId, pageable);			}
+
 			ArrayList<Long> officeIdList = new ArrayList<Long>();
 			officeIdList.add(new Long(0));
 			if(officeId.longValue() != 0){
@@ -356,21 +365,21 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 			}
 			if (mobileNo.equals("") && status != null && status != "") {
 				if (status.equals("UNMP")) {
-					TransactionList = this.mpesaBridgeRepository.unmappedofficed(status, fromDate, toDate, officeIdList);
+					TransactionList = this.mpesaBridgeRepository.unmappedofficed(status, fromDate, toDate, officeIdList, pageable);
 				} else {
-					TransactionList = this.mpesaBridgeRepository.search(status,fromDate, toDate, officeId);							
+					TransactionList = this.mpesaBridgeRepository.search(status,fromDate, toDate, officeId, pageable);							
 				}
 			}
 			if (mobileNo != null && mobileNo != "" && status.equals("")&& status == "") {			
-				TransactionList = this.mpesaBridgeRepository.likesearch(mobileNo, fromDate, toDate, officeId);
+				TransactionList = this.mpesaBridgeRepository.likesearch(mobileNo, fromDate, toDate, officeId, pageable);
 			}
 
 			if (status != null && status != "" && mobileNo != null && mobileNo != "") {
 				if (status.equals("UNMP")) {
-					TransactionList = this.mpesaBridgeRepository.UnMappedOffice(status, mobileNo, fromDate, toDate,officeId);
+					TransactionList = this.mpesaBridgeRepository.UnMappedOffice(status, mobileNo, fromDate, toDate,officeId, pageable);
 
 				} else {
-					TransactionList = this.mpesaBridgeRepository.Exactsearch(status, mobileNo, fromDate, toDate, officeId);
+					TransactionList = this.mpesaBridgeRepository.Exactsearch(status, mobileNo, fromDate, toDate, officeId, pageable);
 				}
 			}
 
