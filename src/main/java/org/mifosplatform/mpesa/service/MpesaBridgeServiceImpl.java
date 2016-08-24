@@ -326,7 +326,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 	public Page<Mpesa> retriveUnmappedTransactions(Long officeId, Integer offset, Integer limit) {
 		Page<Mpesa> unmappedTransactionList = null;
 		try {
-			int pageNo = (offset == null) ? offset = 0 : Integer.divideUnsigned(offset, 15);
+			int pageNo = (offset == null) ? offset = 0 : new Integer(offset/15);
 			limit = (limit == null || limit == 0 ) ? limit = Integer.valueOf(15) : limit;
 			PageRequest pageable = new PageRequest(pageNo, limit);
 			unmappedTransactionList = this.mpesaBridgeRepository.retriveUnmappedTransactions(officeId, pageable);					
@@ -351,7 +351,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 			Date fromDate, Date toDate, Long officeId, Integer offset, Integer limit) {
 		Page<Mpesa> TransactionList = null;
 		try {
-			int pageNo = (offset == null) ? offset = 0 : Integer.divideUnsigned(offset, 15);
+			int pageNo = (offset == null) ? offset = 0 : new Integer(offset/15);
 			limit = (limit == null || limit == 0 ) ? limit = Integer.valueOf(15) : limit;
 			PageRequest pageable = new PageRequest(pageNo, limit);
 			if (mobileNo.equals("") && status.equals("")) {
