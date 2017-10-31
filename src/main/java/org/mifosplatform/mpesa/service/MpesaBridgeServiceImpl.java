@@ -32,6 +32,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -177,8 +178,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 
 		private String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
 		final String loginURL = mifosurl
-				+ "/fineract-provider/api/v1/authentication?username="
-				+ mifosusername + "&password=" + mifospassword;
+				+ "/fineract-provider/api/v1/authentication";
 		System.out.println(loginURL);
 		Client client = null;
 		WebResource webResource = null;
@@ -186,11 +186,14 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 		try {
 			client = ClientHelper.createClient();
 			webResource = client.resource(loginURL);
-
+			
+			JsonObject payload = new JsonObject();
+			payload.addProperty("username", mifosusername);
+			payload.addProperty("password", mifospassword);
 			ClientResponse response = webResource
 					.header("Fineract-Platform-TenantId", tenantIdentifier)
 					.header("Content-Type", "application/json")
-					.post(ClientResponse.class);
+					.post(ClientResponse.class, payload.toString());
 			String responseData = response.getEntity(String.class);
 			JSONObject rootObj = (JSONObject) JSONValue
 					.parseWithException(responseData);
