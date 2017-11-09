@@ -83,7 +83,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 		    boolean isAccountNoFromExcel = false;     //We are getting account no from post request and excel as well so for differentiating it.
 		
 		
-	    DateFormat source = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+		DateFormat source = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
 	    Date newDate=null;  // new transaction date after formatting 
 	    
 		try {
