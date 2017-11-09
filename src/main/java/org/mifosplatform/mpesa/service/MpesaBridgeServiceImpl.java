@@ -307,7 +307,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 				if (clientData != null&& clientData.get("entityType").equals("CLIENT")&& clientData.get("entityMobileNo") != null) {
 				if (clientData.get("entityMobileNo").equals(MobileNo)|| clientData.get("entityMobileNo").equals(mobileNowithZero)) {					
 					String ClientName = (String) clientData.get("entityName");					
-					details = ClientName + "="+ clientData.get("parentId") + "="+ "CMP" + "="+ clientData.get("entityId");				
+					details = ClientName + "="+ clientData.get("parentId") + "="+ "CMP" + "="+ clientData.get("entityId")+ "=" + clientData.get("entityExternalId");				
 				}			
 				else {						
 					details = " " + "=" + " " + "=" + "UNMP"+ "=" + " " + "=" + " " + "=" + " ";
