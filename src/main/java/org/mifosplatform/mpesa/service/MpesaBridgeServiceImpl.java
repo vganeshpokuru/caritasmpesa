@@ -140,11 +140,12 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 						accountNo = accNum.substring(0, accNum.indexOf(" "));
 					}
 				}
-				String MobileNo = null;
-				if((mobileNo != null) && ! (mobileNo.isEmpty())){
+				//String MobileNo = null;
+				//if mobile number with national id then do uncommit
+				/*if((mobileNo != null) && ! (mobileNo.isEmpty())){
 					MobileNo = mobileNo.substring(3, mobileNo.length());
-				}
-				String result = branchMap(MobileNo, accountNo, officeId);
+				}*/
+				String result = branchMap(mobileNo, accountNo, officeId);
 				String data[] = result.split("=");
 				mpesa.setStatus(data[2]);
 				mpesa.setClientName(data[0]);
