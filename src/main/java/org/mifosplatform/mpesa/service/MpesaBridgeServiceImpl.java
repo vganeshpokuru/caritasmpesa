@@ -211,6 +211,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 
 		@Override
 	public String branchMap(String MobileNo, String accountNo, Long officeId) {
+	    String[] officeData = null;	
 		Boolean externalIdSearch = false;
 		Client client = null;
 		String authenticationKey = null;
@@ -235,7 +236,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 					}
 					
 					String officeDetailsByOfficeId = response	.getEntity(String.class);
-					String[] officeData = officeDetailsByOfficeId.split(",");
+					officeData = officeDetailsByOfficeId.split(",");
 					
 					
 					if(officeData !=null && officeData.length > 0){
@@ -316,6 +317,8 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 				else if (clientData != null) {	
 					details = " " + "=" + " " + "=" + "UNMP" + "="+ " " + "=" + " ";
 				}}
+				}else if(officeData !=null && officeData.length > 0){
+					details = "" + "=" + " " + "=" + "BM" + "=" + " " + "=" + " ";
 				}else {
 					details = " " + "=" + " " + "=" + "UNMP" + "=" + " " + "=" + " ";
 				}	
