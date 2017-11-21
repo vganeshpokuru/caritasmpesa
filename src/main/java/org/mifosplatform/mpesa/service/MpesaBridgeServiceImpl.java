@@ -5,19 +5,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
-
-import org.hibernate.validator.internal.metadata.aggregated.ValidatableParametersMetaData;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.mpesa.configuration.ClientHelper;
 import org.mifosplatform.mpesa.domain.Mpesa;
 import org.mifosplatform.mpesa.domain.MpesaBranchMapping;
@@ -36,6 +27,10 @@ import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 
 @Service
 public class MpesaBridgeServiceImpl implements MpesaBridgeService {
@@ -211,7 +206,6 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 
 		@Override
 	public String branchMap(String MobileNo, String accountNo, Long officeId) {
-	    String[] officeData = null;	
 		Boolean externalIdSearch = false;
 		Client client = null;
 		String authenticationKey = null;
@@ -219,6 +213,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 		String details = "";
 		String clientExternalId = null;
 		String officeExternalId = null;
+		String[] officeData = null;
 		try {
 			authenticationKey = loginIntoServerAndGetBase64EncodedAuthenticationKey();
 			if (accountNo != null && accountNo != "" && officeId != 0) {
@@ -317,8 +312,8 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 				else if (clientData != null) {	
 					details = " " + "=" + " " + "=" + "UNMP" + "="+ " " + "=" + " ";
 				}}
-				}else if(officeData !=null && officeData.length > 0){
-					details = "" + "=" + " " + "=" + "BM" + "=" + " " + "=" + " ";
+				}else if(officeData != null && officeData.length > 0){
+					details = " " + "=" + " " + "=" + "BM" + "=" + " " + "=" + " ";
 				}else {
 					details = " " + "=" + " " + "=" + "UNMP" + "=" + " " + "=" + " ";
 				}	
@@ -344,9 +339,17 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 	}
 
 	@Override
-	public List<Mpesa> Payment(Long Id) {
+	public List<Mpesa> Payment(Long Id,Long officeId,Long clientId) {
 		final List<Mpesa> mpesaList = this.mpesaBridgeRepository.retriveTransactionsforPayment(Id);				
 		for (Mpesa mpesa : mpesaList) {
+			 Long defaultOfficeId = mpesa.getOfficeId();
+			 if(defaultOfficeId == 0){
+				 mpesa.setOfficeId(officeId);
+			 }
+			 Long defaultClientId = mpesa.getClientId();
+			 if(defaultClientId == null){
+				 mpesa.setClientId(clientId);
+			 }
 			mpesa.setStatus("PAID");
 			this.mpesaBridgeRepository.save(mpesa);
 		}

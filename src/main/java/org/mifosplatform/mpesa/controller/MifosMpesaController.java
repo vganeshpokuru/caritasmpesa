@@ -252,14 +252,14 @@ public class MifosMpesaController {
 	}
 	
 	@RequestMapping(value = "/postpayment", method = RequestMethod.GET)
-	public @ResponseBody ResponseEntity<Collection<Mpesa>> completePayment ( @QueryParam("id") final Long id){
+	public @ResponseBody ResponseEntity<Collection<Mpesa>> completePayment ( @QueryParam("id") final Long id,@QueryParam("officeId") final Long officeId,@QueryParam("clientId") final Long clientId){
 		 HttpHeaders responseHeaders = new HttpHeaders();
 		List<Mpesa>transactionDetails=null;
 		 responseHeaders.set("Access-Control-Allow-Origin","*");
 		 responseHeaders.set("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS");
 		 //responseHeaders.setOrigin("*");
 		try{
-			transactionDetails = this.mpesaBridgeService.Payment(id);
+			transactionDetails = this.mpesaBridgeService.Payment(id,officeId,clientId);
 					}catch(Exception e){
 			logger.error("Exception " + e);
 		}

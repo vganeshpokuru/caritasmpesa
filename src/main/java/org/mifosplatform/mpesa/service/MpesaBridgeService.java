@@ -21,7 +21,7 @@ public interface MpesaBridgeService {
 
 	public Page<Mpesa> retriveUnmappedTransactions(Long officeId, Integer offset, Integer limit);
 	
-	public List<Mpesa>Payment(Long Id);
+	public List<Mpesa>Payment(Long Id,Long officeId,Long ClientId);
 	
 	
 	public Page<Mpesa> searchMpesaDetail(String status,String mobileNo,Date fromDate,Date toDate,Long officeId, Integer offset, Integer limit);
