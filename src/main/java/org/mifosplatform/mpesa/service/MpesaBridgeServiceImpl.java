@@ -5,10 +5,20 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
+
+import org.apache.commons.lang.StringUtils;
+import org.hibernate.validator.internal.metadata.aggregated.ValidatableParametersMetaData;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.mpesa.configuration.ClientHelper;
 import org.mifosplatform.mpesa.domain.Mpesa;
 import org.mifosplatform.mpesa.domain.MpesaBranchMapping;
@@ -27,10 +37,6 @@ import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
 
 @Service
 public class MpesaBridgeServiceImpl implements MpesaBridgeService {
@@ -235,7 +241,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 					
 					
 					if(officeData !=null && officeData.length > 0){
-						for(int i=0; i<= officeData.length ; i++){
+						for(int i=0; i< officeData.length ; i++){
 								if(officeData[i].contains("externalId")){
 									String[] office = officeData[i].split(":");
 							               officeExternalId = office[1].replaceAll("^\"|\"$", "");
@@ -245,7 +251,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 						}
 					
 					
-					if(officeExternalId != null || officeExternalId !=""){
+					if(StringUtils.isNotBlank(officeExternalId)){
 						
 						clientExternalId = officeExternalId.concat(accountNo);
 						
