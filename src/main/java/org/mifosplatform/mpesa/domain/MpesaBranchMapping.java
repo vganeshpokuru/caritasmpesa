@@ -19,8 +19,8 @@ public class MpesaBranchMapping {
 	@Column(name="office_id")
 	private Long office_id;
 	
-	@Column(name="MpesaPayBillNumber")
-	private String MpesaPayBillNumber;
+	@Column(name="mpesa_pay_bill_number")
+	private String mpesaPayBillNumber;
 
 	public Long getOffice_id() {
 		return office_id;
@@ -31,11 +31,11 @@ public class MpesaBranchMapping {
 	}
 
 	public String getMpesaPayBillNumber() {
-		return MpesaPayBillNumber;
+		return mpesaPayBillNumber;
 	}
 
-	public void setMpesaPayBillNumber(String MpesaPayBillNumber) {
-		this.MpesaPayBillNumber = MpesaPayBillNumber;
+	public void setMpesaPayBillNumber(String mpesaPayBillNumber) {
+		this.mpesaPayBillNumber = mpesaPayBillNumber;
 	}
 	
 	
