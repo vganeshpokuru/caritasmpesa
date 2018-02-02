@@ -161,7 +161,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 				}
 				response = this.mpesaBridgeRepository.save(mpesa);
 				if (response != null) {
-					responseData = "OK|Thank you for your payment";
+					responseData = "OK|Thank you";
 				}
 			} else {
 				logger.info("Empty Parameter passed");
