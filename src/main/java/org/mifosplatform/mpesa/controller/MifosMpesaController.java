@@ -72,7 +72,7 @@ public class MifosMpesaController {
    
 	
 
-	@RequestMapping(value = "/transactiondetails", method = RequestMethod.POST, consumes = "text/plain;charset=UTF-8")
+	@RequestMapping(value = "/transactiondetails", method = RequestMethod.POST)
 	public @ResponseBody ResponseEntity<String> storeTransactionDetails(@RequestBody final String requestBody) {
 		Long id = null; 
 		String orig = null;;
