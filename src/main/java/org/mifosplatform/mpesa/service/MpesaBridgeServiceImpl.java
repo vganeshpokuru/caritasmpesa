@@ -67,8 +67,8 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 	public String storeTransactionDetails(final String id, final String origin, final String dest, final String tStamp,
 			final String text, final String user, final String pass, final String mpesaCode, final String mpesaAccount,
 			final String mobileNo, final Date txnDate, final String txnTime, final BigDecimal mpesaAmount,
-			final String sender, final String mpesaTxnType, Long officeId, final String customer_id,
-			final String routemethod_id, final String routemethod_name, final String business_number) {
+			final String sender, final String mpesaTxnType, Long officeId, final String customerId,
+			final String routemethodId, final String routemethodName, final String businessNumber) {
 		
 		    Mpesa mpesa = null;
 		    Mpesa response = null;
@@ -77,7 +77,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 		    boolean isAccountNoFromExcel = false;     //We are getting account no from post request and excel as well so for differentiating it.
 		
 		
-		DateFormat source = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+		DateFormat source = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ENGLISH);
 	    Date newDate=null;  // new transaction date after formatting 
 	    
 		try {
@@ -123,10 +123,10 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 				mpesa.setSender(sender);
 				mpesa.setType(mpesaTxnType);
 				mpesa.setOfficeId(officeId);
-				mpesa.setCustomerId(customer_id);
-				mpesa.setRoutemethodId(routemethod_id);
-				mpesa.setRoutemethodName(routemethod_name);
-				mpesa.setBusinessNumber(business_number);
+				mpesa.setCustomerId(customerId);
+				mpesa.setRoutemethodId(routemethodId);
+				mpesa.setRoutemethodName(routemethodName);
+				mpesa.setBusinessNumber(businessNumber);
 				String accountNo = null;
 				if (isAccountNoFromExcel == true) {  //if true means account no coming from excel sheet 
 					if (text.contains("Acc. ")) {
