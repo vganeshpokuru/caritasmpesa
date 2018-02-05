@@ -68,6 +68,7 @@ public class MifosMpesaController {
 			final String user,@QueryParam("pass") final String pass,@QueryParam("mpesa_code") final String mpesa_code, @QueryParam("mpesa_acc")
 			final String mpesa_acc,@QueryParam("mpesa_msisdn") final String mpesa_msisdn,@QueryParam("mpesa_trx_date") final Date mpesa_trx_date,@QueryParam("mpesa_trx_time")
 			final String mpesa_trx_time,@QueryParam("mpesa_amt") final BigDecimal mpesa_amt,@QueryParam("mpesa_sender") final String mpesa_sender){
+		System.out.println("mpesa_code: " + mpesa_code);
 		String responseMessage = "";
 		  StringBuilder requestMsg = new StringBuilder();
 		
