@@ -73,7 +73,7 @@ public class MifosMpesaController {
 
 	@RequestMapping(value = "/transactiondetails", method = RequestMethod.POST)
 	public @ResponseBody ResponseEntity<String> storeTransactionDetails(@RequestBody final String requestBody) {
-		System.out.println(new LocalDate() + "request recieved" +requestBody);
+		System.out.println(new LocalDate() + ": request recieved :" +requestBody);
 		String id = null; 
 		String orig = null;;
 		String dest = null;
