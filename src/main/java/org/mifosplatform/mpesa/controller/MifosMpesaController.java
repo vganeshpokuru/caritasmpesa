@@ -69,9 +69,9 @@ public class MifosMpesaController {
    
 	
 
-	@SuppressWarnings("deprecation")
 	@RequestMapping(value = "/transactiondetails", method = RequestMethod.POST)
 	public @ResponseBody ResponseEntity<String> storeTransactionDetails(@RequestBody final String requestBody) {
+		System.out.println(requestBody);
 		String id = null; 
 		String orig = null;;
 		String dest = null;
