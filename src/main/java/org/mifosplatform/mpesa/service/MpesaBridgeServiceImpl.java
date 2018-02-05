@@ -123,6 +123,10 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 				mpesa.setSender(sender);
 				mpesa.setType(mpesaTxnType);
 				mpesa.setOfficeId(officeId);
+				mpesa.setCustomerId(customer_id);
+				mpesa.setRoutemethodId(routemethod_id);
+				mpesa.setRoutemethodName(routemethod_name);
+				mpesa.setBusinessNumber(business_number);
 				String accountNo = null;
 				if (isAccountNoFromExcel == true) {  //if true means account no coming from excel sheet 
 					if (text.contains("Acc. ")) {
