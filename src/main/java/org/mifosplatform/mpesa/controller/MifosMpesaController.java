@@ -20,19 +20,16 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 
 import org.mifosplatform.mpesa.domain.Mpesa;
 import org.mifosplatform.mpesa.service.MpesaBridgeService;
@@ -72,9 +69,10 @@ public class MifosMpesaController {
    
 	
 
+	@SuppressWarnings("deprecation")
 	@RequestMapping(value = "/transactiondetails", method = RequestMethod.POST)
 	public @ResponseBody ResponseEntity<String> storeTransactionDetails(@RequestBody final String requestBody) {
-		Long id = null; 
+		String id = null; 
 		String orig = null;;
 		String dest = null;
 		String tstamp = null; 
@@ -88,6 +86,10 @@ public class MifosMpesaController {
 		String mpesa_trx_time = null;
 		BigDecimal mpesa_amt = null;
 		String mpesa_sender = null;
+		String customer_id = null;
+		String routemethod_id = null;
+		String routemethod_name = null;
+		String business_number = null;
 		
 		String responseMessage = "";
 		try {
@@ -102,7 +104,7 @@ public class MifosMpesaController {
 								query_pairs.put(key,"");
 							}
 				}
-				id = Long.parseLong(query_pairs.get("id"));
+				id = query_pairs.get("id");
 				orig = query_pairs.get("orig");
 				mpesa_code = query_pairs.get("mpesa_code");
 				dest = query_pairs.get("dest");
@@ -111,12 +113,18 @@ public class MifosMpesaController {
 				user = query_pairs.get("user");
 				pass = query_pairs.get("pass");
 				mpesa_msisdn = query_pairs.get("mpesa_msisdn");
-				mpesa_trx_date = new Date(query_pairs.get("mpesa_trx_date"));
+				SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddhhmmss");
+				mpesa_trx_date  = formatter.parse(query_pairs.get("mpesa_trx_date"));
+				//mpesa_trx_date = new Date(query_pairs.get("mpesa_trx_date"));
 				mpesa_trx_time = query_pairs.get("mpesa_trx_time");
 				mpesa_amt = new BigDecimal(query_pairs.get("mpesa_amt"));
 				mpesa_sender = query_pairs.get("mpesa_sender");
 				mpesa_acc = query_pairs.get("mpesa_acc");
-		} catch (URISyntaxException | UnsupportedEncodingException e1) {
+				customer_id = query_pairs.get("customer_id");
+				routemethod_id = query_pairs.get("routemethod_id");
+				routemethod_name = query_pairs.get("routemethod_name");
+				business_number = query_pairs.get("business_number");
+		} catch (URISyntaxException | UnsupportedEncodingException | ParseException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
@@ -152,7 +160,7 @@ public class MifosMpesaController {
 			Long officeId=(long) 0;
 			if(user.equalsIgnoreCase(mpesausername) && pass.equalsIgnoreCase(mpesapassword)){
 				responseMessage = this.mpesaBridgeService.storeTransactionDetails(id,orig,dest,tstamp,text,user,pass,mpesa_code,mpesa_acc,
-					mpesa_msisdn,mpesa_trx_date,time +" "+mpesa_trx_time,mpesa_amt,mpesa_sender,"PaidIn",officeId);
+					mpesa_msisdn,mpesa_trx_date,time +" "+mpesa_trx_time,mpesa_amt,mpesa_sender,"PaidIn",officeId,customer_id,routemethod_id,routemethod_name,business_number);
 			}
 			if(responseMessage.equalsIgnoreCase(mpesa_code)){
 				return new ResponseEntity<String>("CONFLICT:" +responseMessage,HttpStatus.CONFLICT);
@@ -166,7 +174,7 @@ public class MifosMpesaController {
 		return new ResponseEntity<String>(responseMessage,HttpStatus.OK);
 		
 	}
-	@RequestMapping(value = "/transactiondetails", method = RequestMethod.GET)
+/*	@RequestMapping(value = "/transactiondetails", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<String> storeTransactionDetail(@QueryParam("id") final Long id,@QueryParam("orig") final String orig,
 			@QueryParam("dest") final String dest,@QueryParam("tstamp") final String tstamp,@QueryParam("text") final String text,@QueryParam("user")
 			final String user,@QueryParam("pass") final String pass,@QueryParam("mpesa_code") final String mpesa_code, @QueryParam("mpesa_acc")
@@ -268,7 +276,7 @@ public class MifosMpesaController {
 		
 		return new ResponseEntity<String>(responseMessage,HttpStatus.OK);
 		
-	}
+	}*/
 	
 	
 	/*@RequestMapping(value = "/mpesatransactions", method = RequestMethod.GET)

@@ -5,20 +5,11 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
-
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.validator.internal.metadata.aggregated.ValidatableParametersMetaData;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.mpesa.configuration.ClientHelper;
 import org.mifosplatform.mpesa.domain.Mpesa;
 import org.mifosplatform.mpesa.domain.MpesaBranchMapping;
@@ -37,6 +28,10 @@ import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 
 @Service
 public class MpesaBridgeServiceImpl implements MpesaBridgeService {
@@ -69,13 +64,11 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 
 	@Override
 	@Transactional
-	public String storeTransactionDetails(final Long id, final String origin,
-			final String dest, final String tStamp, final String text,
-			final String user, final String pass, final String mpesaCode,
-			final String mpesaAccount, final String mobileNo,
-			final Date txnDate, final String txnTime,
-			final BigDecimal mpesaAmount, final String sender,
-			final String mpesaTxnType, Long officeId) {
+	public String storeTransactionDetails(final String id, final String origin, final String dest, final String tStamp,
+			final String text, final String user, final String pass, final String mpesaCode, final String mpesaAccount,
+			final String mobileNo, final Date txnDate, final String txnTime, final BigDecimal mpesaAmount,
+			final String sender, final String mpesaTxnType, Long officeId, final String customer_id,
+			final String routemethod_id, final String routemethod_name, final String business_number) {
 		
 		    Mpesa mpesa = null;
 		    Mpesa response = null;
