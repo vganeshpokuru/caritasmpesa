@@ -31,6 +31,8 @@ import java.util.Map;
 
 import javax.ws.rs.QueryParam;
 
+import org.apache.tomcat.jni.Local;
+import org.joda.time.LocalDate;
 import org.mifosplatform.mpesa.domain.Mpesa;
 import org.mifosplatform.mpesa.service.MpesaBridgeService;
 import org.slf4j.Logger;
@@ -71,7 +73,7 @@ public class MifosMpesaController {
 
 	@RequestMapping(value = "/transactiondetails", method = RequestMethod.POST)
 	public @ResponseBody ResponseEntity<String> storeTransactionDetails(@RequestBody final String requestBody) {
-		System.out.println(requestBody);
+		System.out.println(new LocalDate() + "request recieved" +requestBody);
 		String id = null; 
 		String orig = null;;
 		String dest = null;
