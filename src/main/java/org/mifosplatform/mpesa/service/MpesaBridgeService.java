@@ -16,7 +16,7 @@ public interface MpesaBridgeService {
 	//public ArrayList<Mpesa> retriveAllTransactions(Long officeId);
 
 	public String storeTransactionDetails(final String id, final String origin, final String dest,final String tStamp, final String text, final String user, 
-			final String pass, final String mpesaCode, final String mpesaAccount, final String mobileNo,final Date txnDate, final String txnTime, 
+			final String pass, final String mpesaCode, final String mpesaAccount, final String mobileNo,final String txnDate, final String txnTime, 
 			final BigDecimal mpesaAmount, final String sender,final String mpesaTxnType,final Long officeId);
 
 	public Page<Mpesa> retriveUnmappedTransactions(Long officeId, Integer offset, Integer limit);

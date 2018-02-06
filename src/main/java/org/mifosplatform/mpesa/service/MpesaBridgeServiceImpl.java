@@ -73,7 +73,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 			final String dest, final String tStamp, final String text,
 			final String user, final String pass, final String mpesaCode,
 			final String mpesaAccount, final String mobileNo,
-			final Date txnDate, final String txnTime,
+			final String txnDate, final String txnTime,
 			final BigDecimal mpesaAmount, final String sender,
 			final String mpesaTxnType, Long officeId) {
 		
@@ -84,7 +84,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 		    boolean isAccountNoFromExcel = false;     //We are getting account no from post request and excel as well so for differentiating it.
 		
 		
-		DateFormat source = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+		DateFormat source = new SimpleDateFormat("yyyyMMddhhmmss", Locale.ENGLISH);
 	    Date newDate=null;  // new transaction date after formatting 
 	    
 		try {
@@ -98,7 +98,8 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 				newDate = source.parse(tStamp);
 			    //client mapping is done based on national id and mobile number 
 			}else{
-				newDate = txnDate; 
+				SimpleDateFormat formate  = new SimpleDateFormat("yyyyMMddhhmmss");
+				newDate = formate.parse(txnDate); 
 				isAccountNoFromExcel = true;  // else contains it comes from file upload and bidefualt office is - headoffice , user can changes it. but it  
 			}                                 // contains office compulsory
 		} catch (ParseException e1) {
