@@ -100,7 +100,7 @@ public class MifosMpesaController {
             }
             }
 			Long officeId=(long) 0;
-			if(user.equalsIgnoreCase(mpesausername) && pass.equalsIgnoreCase(mpesapassword)){
+			if((user == null || user.equalsIgnoreCase(mpesausername)) && pass.equalsIgnoreCase(mpesapassword)){
 				responseMessage = this.mpesaBridgeService.storeTransactionDetails(id,orig,dest,tstamp,text,user,pass,mpesa_code,mpesa_acc,
 					mpesa_msisdn,mpesa_trx_date,time +" "+mpesa_trx_time,mpesa_amt,mpesa_sender,"PaidIn",officeId);
 			}
