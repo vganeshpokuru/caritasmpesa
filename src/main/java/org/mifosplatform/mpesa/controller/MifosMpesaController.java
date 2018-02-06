@@ -63,7 +63,7 @@ public class MifosMpesaController {
 	
 
 	@RequestMapping(value = "/transactiondetails", method = RequestMethod.POST)
-	public @ResponseBody ResponseEntity<String> storeTransactionDetails(@QueryParam("id") final Long id,@QueryParam("orig") final String orig,
+	public @ResponseBody ResponseEntity<String> storeTransactionDetails(@QueryParam("id") final String id,@QueryParam("orig") final String orig,
 			@QueryParam("dest") final String dest,@QueryParam("tstamp") final String tstamp,@QueryParam("text") final String text,@QueryParam("user")
 			final String user,@QueryParam("pass") final String pass,@QueryParam("mpesa_code") final String mpesa_code, @QueryParam("mpesa_acc")
 			final String mpesa_acc,@QueryParam("mpesa_msisdn") final String mpesa_msisdn,@QueryParam("mpesa_trx_date") final Date mpesa_trx_date,@QueryParam("mpesa_trx_time")
@@ -117,7 +117,7 @@ public class MifosMpesaController {
 		
 	}
 	@RequestMapping(value = "/transactiondetails", method = RequestMethod.GET)
-	public @ResponseBody ResponseEntity<String> storeTransactionDetail(@QueryParam("id") final Long id,@QueryParam("orig") final String orig,
+	public @ResponseBody ResponseEntity<String> storeTransactionDetail(@QueryParam("id") final String id,@QueryParam("orig") final String orig,
 			@QueryParam("dest") final String dest,@QueryParam("tstamp") final String tstamp,@QueryParam("text") final String text,@QueryParam("user")
 			final String user,@QueryParam("pass") final String pass,@QueryParam("mpesa_code") final String mpesa_code, @QueryParam("mpesa_acc")
 			final String mpesa_acc,@QueryParam("mpesa_msisdn") final String mpesa_msisdn,@QueryParam("mpesa_trx_date") final Date mpesa_trx_date,@QueryParam("mpesa_trx_time")
@@ -172,7 +172,7 @@ public class MifosMpesaController {
 		
 	}
 	@RequestMapping(value = "/transactiondetail", method = RequestMethod.POST)
-	public @ResponseBody ResponseEntity<String> storeTransactionDetail(@QueryParam("id") final Long id,@QueryParam("orig") final String orig,
+	public @ResponseBody ResponseEntity<String> storeTransactionDetail(@QueryParam("id") final String id,@QueryParam("orig") final String orig,
 			@QueryParam("dest") final String dest,@QueryParam("tstamp") final String tstamp,@QueryParam("text") final String text,@QueryParam("user")
 			final String user,@QueryParam("pass") final String pass,@QueryParam("mpesa_code") final String mpesa_code, @QueryParam("mpesa_acc")
 			final String mpesa_acc,@QueryParam("mpesa_msisdn") final String mpesa_msisdn,@QueryParam("mpesa_trx_date") final Date mpesa_trx_date,@QueryParam("mpesa_trx_time")

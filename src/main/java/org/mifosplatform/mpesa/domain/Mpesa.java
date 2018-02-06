@@ -21,7 +21,7 @@ public class Mpesa {
 	private Long id;
 	
 	@Column(name="ipn_id")
-	private Long ipnId;
+	private String ipnId;
 	
 	@Column(name="orig")
 	private String origin;
@@ -89,11 +89,11 @@ public class Mpesa {
 		this.id = id;
 	}
 
-	public Long getIpnId() {
+	public String getIpnId() {
 		return this.ipnId;
 	}
 
-	public void setIpnId(Long ipnId) {
+	public void setIpnId(String ipnId) {
 		this.ipnId = ipnId;
 	}
 

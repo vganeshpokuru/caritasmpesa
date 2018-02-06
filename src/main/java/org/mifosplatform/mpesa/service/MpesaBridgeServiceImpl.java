@@ -69,7 +69,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 
 	@Override
 	@Transactional
-	public String storeTransactionDetails(final Long id, final String origin,
+	public String storeTransactionDetails(final String id, final String origin,
 			final String dest, final String tStamp, final String text,
 			final String user, final String pass, final String mpesaCode,
 			final String mpesaAccount, final String mobileNo,
