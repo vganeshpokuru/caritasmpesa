@@ -21,7 +21,7 @@ public interface MpesaBridgeRepository extends CrudRepository<Mpesa, Long>{
 	@Query("from Mpesa mpesa WHERE mpesa.mobileNo like :phoneNo AND mpesa.status in ('R','UNMP') and mpesa.type!='WithDraw' and mpesa.officeId=:officeId ")
 	List<Mpesa> fetchTransactionInfoById(@Param("phoneNo") String phoneNo,@Param("officeId") Long officeId);
 
-	@Query(" from Mpesa mpesa WHERE mpesa.status in ('CMP','R','BM') and  mpesa.type!='WithDraw' and mpesa.officeId=:officeId")
+	@Query(" from Mpesa mpesa WHERE mpesa.status in ('CMP','R','BM') and  mpesa.type!='WithDraw' and mpesa.officeId=:officeId order by mpesa.transactionDate desc")
 	Page<Mpesa> retriveUnmappedTransactions(@Param("officeId") Long officeId, Pageable pageable);
 	
 	@Query(" from Mpesa mpesa WHERE mpesa.id=:id")

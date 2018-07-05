@@ -84,7 +84,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 		    boolean isAccountNoFromExcel = false;     //We are getting account no from post request and excel as well so for differentiating it.
 		
 		
-		DateFormat source = new SimpleDateFormat("yyyyMMddhhmmss", Locale.ENGLISH);
+		DateFormat source = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.ENGLISH);
 	    Date newDate=null;  // new transaction date after formatting 
 	    
 		try {
@@ -98,7 +98,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 				newDate = source.parse(tStamp);
 			    //client mapping is done based on national id and mobile number 
 			}else{
-				SimpleDateFormat formate  = new SimpleDateFormat("yyyyMMddhhmmss");
+				SimpleDateFormat formate  = new SimpleDateFormat("dd/MM/yy");
 				newDate = formate.parse(txnDate); 
 				isAccountNoFromExcel = true;  // else contains it comes from file upload and bidefualt office is - headoffice , user can changes it. but it  
 			}                                 // contains office compulsory
@@ -180,8 +180,9 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 	}
 
 		private String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
-		final String loginURL = mifosurl
-				+ "/fineract-provider/api/v1/authentication";
+			final String loginURL = mifosurl
+					+ "/mifosng-provider/api/v1/authentication?username="
+					+ mifosusername + "&password=" + mifospassword;
 		System.out.println(loginURL);
 		Client client = null;
 		WebResource webResource = null;
@@ -194,7 +195,7 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 			payload.addProperty("username", mifosusername);
 			payload.addProperty("password", mifospassword);
 			ClientResponse response = webResource
-					.header("Fineract-Platform-TenantId", tenantIdentifier)
+					.header("X-Mifos-Platform-TenantId", tenantIdentifier)
 					.header("Content-Type", "application/json")
 					.post(ClientResponse.class, payload.toString());
 			String responseData = response.getEntity(String.class);
@@ -227,8 +228,8 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 				client = ClientHelper.createClient();
 				
 				if(officeId != null && officeId !=0){
-					webResource = client.resource(mifosurl+ "/fineract-provider/api/v1/offices/" +officeId);
-					ClientResponse response = webResource.header("Fineract-Platform-TenantId", tenantIdentifier)
+					webResource = client.resource(mifosurl+ "/mifosng-provider/api/v1/offices/" +officeId);
+					ClientResponse response = webResource.header("X-Mifos-Platform-TenantId", tenantIdentifier)
 											  .header("Content-Type", "application/json")
 											  .header("Authorization", "Basic " + authenticationKey)
 											  .get(ClientResponse.class);	
@@ -261,9 +262,9 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 					
 				}
 				
-				webResource = client.resource(mifosurl+ "/fineract-provider/api/v1/search?query=" + clientExternalId+ "&resource=clients");
+				webResource = client.resource(mifosurl+ "/mifosng-provider/api/v1/search?query=" + clientExternalId+ "&resource=clients");
 				ClientResponse response = webResource
-						.header("Fineract-Platform-TenantId", tenantIdentifier)
+						.header("X-Mifos-Platform-TenantId", tenantIdentifier)
 						.header("Content-Type", "application/json")
 						.header("Authorization", "Basic " + authenticationKey)
 						.get(ClientResponse.class);				
@@ -291,9 +292,9 @@ public class MpesaBridgeServiceImpl implements MpesaBridgeService {
 			if (!externalIdSearch) {
 				String mobileNowithZero = MobileNo;
 				client = ClientHelper.createClient();
-				webResource = client.resource(mifosurl+ "/fineract-provider/api/v1/search?query=" + MobileNo+ "&resource=clients");
+				webResource = client.resource(mifosurl+ "/mifosng-provider/api/v1/search?query=" + MobileNo+ "&resource=clients");
 				ClientResponse clientsDatasearchByMobileNo = webResource
-						.header("Fineract-Platform-TenantId", tenantIdentifier)
+						.header("X-Mifos-Platform-TenantId", tenantIdentifier)
 						.header("Content-Type", "application/json")
 						.header("Authorization", "Basic " + authenticationKey)
 						.get(ClientResponse.class);				
